@@ -1,8 +1,7 @@
 run: hola
 	./hola
-comp: hola.cpp Node.o
+hola: Node.o hola.cpp
 	g++ -o hola Node.o hola.cpp
-
 Node.o: Node.cpp Node.h
 	g++ -c Node.cpp
 clean:

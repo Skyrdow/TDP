@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
     for (int i = 0; i < 7; i++)
     {
         int izq1[4] = {1+i,2,3,4};
-        int der1[4] = {1*i,2,3,4};
+        int der1[4] = {i*i,2,3,4};
         Node *prevNode = nodoNuevo;
         nodoNuevo = new Node(izq1, der1, prevNode);
     }

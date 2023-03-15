@@ -15,10 +15,17 @@ Node::Node(int i[4], int d[4], Node *p)
 
 void Node::print()
 {
+    cout << "( ";
     for (int i = 0; i < 4; i++)
     {
-        cout << "(" << izq[i] << "|" << der[i] << ")" << endl;
+        cout << izq[i] << " ";
     }
+    cout << "| ";
+    for (int i = 0; i < 4; i++)
+    {
+        cout << der[i] << " ";
+    }
+    cout << ")" << endl;
 }
 
 void Node::printPrevious()
