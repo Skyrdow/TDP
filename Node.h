@@ -6,4 +6,6 @@ public:
     Node *previo;
     Node(int i[4], int d[4], Node *p);
     ~Node();
+    void print();
+    void printPrevious();
 };
