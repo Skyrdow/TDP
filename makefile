@@ -1,8 +1,10 @@
-run: hola
-	./hola
-hola: Node.o hola.cpp
-	g++ -o hola Node.o hola.cpp
-Node.o: Node.cpp Node.h
-	g++ -c Node.cpp
+run: test
+	./test
+test: RiverCrossing.o
+	g++ -o test State.o RiverCrossing.o test.cpp
+RiverCrossing.o: State.o RiverCrossing.cpp
+	g++ -c State.cpp RiverCrossing.cpp 
+State.o: State.cpp
+	g++ -c State.cpp
 clean:
-	rm -f hola *.o
+	rm -f test *.o
