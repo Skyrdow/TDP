@@ -40,7 +40,9 @@ void FileReader::fillRestrMatrix(unsigned int *restrMatrix, unsigned int restrCo
             restrMatrix[i] += 1 << pow;
         }
         if (!isRightSide)
+        {
             restrMatrix[i] = ~restrMatrix[i]; // https://stackoverflow.com/questions/40169322/c-how-to-flip-the-binary-values-of-each-bit-in-int
+        }
     }
 }
 

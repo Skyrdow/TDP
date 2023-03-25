@@ -8,6 +8,23 @@ using namespace std;
 
 RiverCrossing::RiverCrossing(){}
 
+bool RiverCrossing::isValidState(State *checkState)
+{
+    unsigned int leftSide = ~(checkState->rightSide);
+    cout << "2";
+    for (int i = 0; i < leftRestrictionCount; i++)
+    {
+        if (leftSide == leftRestrictionMatrix[i])
+            return false;
+    }
+    for (int i = 0; i < rightRestrictionCount; i++)
+    {
+        if (checkState->rightSide == rightRestrictionMatrix[i])
+            return false;
+    }
+    return true;
+}
+
 State *RiverCrossing::solve(const char *fileName)
 {
     FileReader *fr = new FileReader();
@@ -16,28 +33,14 @@ State *RiverCrossing::solve(const char *fileName)
     {
         int totalItemsCount = driverCount+itemCount;
         State *currentState = new State(totalItemsCount);
-        int move[2] = {2,3};
+        int move[2] = {3,4};
         currentState->print();
         State *s2State = currentState->boatMove(move, 2);
         s2State->print();
-        cout << isValidState(s2State);
+        cout << "2";
+        isValidState(s2State);
+        cout << "1";
         return currentState;
     }
-    return NULL;
-}
-
-bool RiverCrossing::isValidState(State *state)
-{
-    cout << "lrc" << leftRestrictionCount << "rrc" << rightRestrictionCount;
-    for (int i = 0; i < leftRestrictionCount; i++)
-    {
-        if (state->rightSide == leftRestrictionMatrix[i])
-            return false;
-    }
-    for (int i = 0; i < rightRestrictionCount; i++)
-    {
-        if (state->rightSide == rightRestrictionMatrix[i])
-            return false;
-    }
-    return true;
+    return nullptr;
 }
