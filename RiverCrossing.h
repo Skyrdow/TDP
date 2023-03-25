@@ -1,4 +1,4 @@
-
+#include "State.h"
 class RiverCrossing
 {
 private:
@@ -6,13 +6,15 @@ private:
 public:
     int driverCount;
     int itemCount;
+    int boatCount;
     int leftRestrictionCount;
-    int **leftRestrictionMatrix;
-    int **rightRestrictionMatrix;
+    int rightRestrictionCount;
+    unsigned int *leftRestrictionMatrix;
+    unsigned int *rightRestrictionMatrix;
 
     RiverCrossing();
     ~RiverCrossing();
 
-    bool readProblemFile(const char *fileName);
-    State *RiverCrossing::solve(const char *fileName);
+    State *solve(const char *fileName);
+    bool isValidState(State *state);
 };

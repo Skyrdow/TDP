@@ -1,10 +1,8 @@
 run: test
 	./test
 test: RiverCrossing.o
-	g++ -o test State.o RiverCrossing.o test.cpp
-RiverCrossing.o: State.o RiverCrossing.cpp
-	g++ -c State.cpp RiverCrossing.cpp 
-State.o: State.cpp
-	g++ -c State.cpp
+	g++ -o test State.o RiverCrossing.o FileReader.o test.cpp
+RiverCrossing.o: FileReader.cpp State.cpp  RiverCrossing.cpp
+	g++ -c State.cpp RiverCrossing.cpp FileReader.cpp
 clean:
 	rm -f test *.o
