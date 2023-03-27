@@ -1,4 +1,3 @@
-#include<math.h>
 #include "State.h"
 #include <iostream>
 #include <bitset>
@@ -29,12 +28,9 @@ State::State(int right, int stateSize, boatSide newBoatSide)
 
 void State::print()
 {
-    std::bitset<sizeof(int)*8> A = this->rightSide;//A will hold the binary representation of N 
-    for(int i=0; i<sizeof(int)*8; i++)
-    {
-        std::cout << A[i] << " ";
-    }
-    std::cout << std::endl;
+    // A will hold the binary representation of N 
+    std::bitset<sizeof(int)*8> A = this->rightSide;
+    std::cout << A << std::endl;
 }
 
 State *State::copy()
@@ -61,7 +57,7 @@ State *State::boatMove(int movingArray[], int arrLength)
     for (int i = 0; i < arrLength; i++)
     {
         movingItem = 1 << movingArray[i] - 1;
-        movingDirection = pow(-1, static_cast<int>(this->currentBoatSide)); // enum boatSide: L=0, R=1
+        movingDirection = static_cast<int>(this->currentBoatSide) ? -1 : 1; // enum boatSide: L=0, R=1
         newState->rightSide = newState->rightSide + (movingItem * movingDirection);
     }
     newState->swapBoatSide();

@@ -1,15 +1,25 @@
-
 #include <fstream>
 
 class FileReader
 {
 private:
-    int *allocateMatrix(int restrCount, int totalItemCount);
-    void fillRestrMatrix(unsigned int *restrMatrix, unsigned int restrCount, std::ifstream *file, bool isRightSide);
-    void printBits(int N);
+    std::ifstream *inputFile;
+    std::string countLine;
+    int driverCount;
+    int itemCount;
+    int boatSize;
+
 public:
     FileReader(/* args */);
     ~FileReader();
-    bool read(unsigned int *restriccionesIzq, unsigned int *restriccionesDer, int *C, int *I, int *b, int *cantidadRestriccionesIzq, int *cantidadRestriccionesDer);
 
+    void fillRestrMatrix(int **restrMatrix, int restrCount);
+    void fillLeftMatrix(unsigned int *restrMatrix, int restrCount);
+    void fillRightMatrix(unsigned int *restrMatrix, int restrCount);
+    void readCountLine();
+    int getDriverCount();
+    int getItemCount();
+    int getBoatSize();
+    int readRestrictionSize();
+    bool openFile(const char *fileName);
 };

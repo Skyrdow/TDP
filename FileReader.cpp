@@ -7,30 +7,68 @@
 
 using namespace std;
 
+// Autor: Lucas Mesías
 // Código original: Pablo Román  "testLoad.cpp"
 
-FileReader::FileReader(/* args */){}
+FileReader::FileReader(){}
 
-FileReader::~FileReader(){}
-
-void FileReader::printBits(int N)
+// Es necesario borrar el objeto (delete obj;) para cerrar el archivo
+FileReader::~FileReader()
 {
-    std::bitset<sizeof(int)*8> A = N; //A will hold the binary representation of N 
-    for(int i=0; i<sizeof(int)*8; i++)
-    {
-        std::cout << A[i] << " ";
-    }
-    std::cout << std::endl;
+    this->inputFile->close();
 }
 
-void FileReader::fillRestrMatrix(unsigned int *restrMatrix, unsigned int restrCount, ifstream *file, bool isRightSide)
+bool FileReader::openFile(const char *fileName)
+{
+    this->inputFile = new ifstream(fileName); // abrir el archivo
+    if (this->inputFile->is_open()) 
+    {
+        std::cout << "archivo abierto" << std::endl;
+        return true;
+
+    }
+    std::cout << "archivo no encontrado" << std::endl;
+    return false;
+    
+}
+
+void FileReader::readCountLine()
+{
+    // leer la primera linea
+    getline(*this->inputFile, this->countLine);
+    stringstream ss;
+    // copiar la linea al stream
+    ss << this->countLine; 
+    // leer los datos del stream
+    ss >> this->driverCount >> this->itemCount >> this->boatSize; 
+    cout << "Conductores:" << driverCount
+         << " Items:" << itemCount 
+         << " Capacidad Botes:" << boatSize
+         << endl;
+}
+
+int FileReader::getDriverCount() { return this->driverCount; }
+int FileReader::getItemCount() { return this->itemCount; }
+int FileReader::getBoatSize() { return this->boatSize; }
+
+int FileReader::readRestrictionSize()
+{
+    // leer la segunda linea
+    string line;
+    getline(*this->inputFile, line);
+    // c_str convierte el string a un arreglo de caracteres
+    return atoi(line.c_str()); 
+}
+
+void FileReader::fillLeftMatrix(unsigned int *restrMatrix, int restrCount)
 {
     string line;
     stringstream ss;
-    for (int i = 0; i < restrCount; i++) {
+    for (int i = 0; i < restrCount; i++) 
+    {
         restrMatrix[i] = 0; // asegurar que no exista basura en el puntero
         int pow = 0;
-        getline(*file, line);
+        getline(*this->inputFile, line);
         ss.clear(); // limpiar el stream de caracteres
         ss << line; // copiar la linea al stream
         int a;
@@ -39,62 +77,43 @@ void FileReader::fillRestrMatrix(unsigned int *restrMatrix, unsigned int restrCo
             pow = a-1;
             restrMatrix[i] += 1 << pow;
         }
-        if (!isRightSide)
-        {
-            restrMatrix[i] = ~restrMatrix[i]; // https://stackoverflow.com/questions/40169322/c-how-to-flip-the-binary-values-of-each-bit-in-int
+        // https://stackoverflow.com/questions/40169322/c-how-to-flip-the-binary-values-of-each-bit-in-int
+        restrMatrix[i] = ~restrMatrix[i];
+    }
+}
+void FileReader::fillRightMatrix(unsigned int *restrMatrix, int restrCount)
+{
+    string line;
+    stringstream ss;
+    for (int i = 0; i < restrCount; i++) 
+    {
+        restrMatrix[i] = 0; // asegurar que no exista basura en el puntero
+        int pow = 0;
+        getline(*this->inputFile, line);
+        ss.clear(); // limpiar el stream de caracteres
+        ss << line; // copiar la linea al stream
+        int a;
+        while (ss >> a) // https://comp.lang.cpp.moderated.narkive.com/vwstw4Un/std-stringstream-and-eof-strangeness
+        { 
+            pow = a-1;
+            restrMatrix[i] += 1 << pow;
         }
     }
 }
-
-bool FileReader::read(unsigned int *restriccionesIzq, unsigned int *restriccionesDer, int *C, int *I, int *b, int *cantidadRestriccionesIzq, int *cantidadRestriccionesDer) 
+void FileReader::fillRestrMatrix(int **restrMatrix, int restrCount)
 {
-    ifstream *input = new ifstream("test.txt"); // abrir el archivo
-    if (input->is_open()) { // verificar que el archivo se abrio correctamente
-        std::cout << "archivo abierto" << std::endl;
-
-    } else {
-        std::cout << "archivo no encontrado" << std::endl;
-        return false;
-    }
-
-    string line; // linea de texto
-    stringstream ss; // stream de caracteres
-
-    // variables a leer del archivo
-
-    // leer la primera linea
-    getline(*input, line);
+    string line;
+    stringstream ss;
+    for (int i = 0; i < restrCount; i++) {
+    getline(*this->inputFile, line);
+    ss.clear(); // limpiar el stream de caracteres
     ss << line; // copiar la linea al stream
-    ss >> *C >> *I >> *b; // leer los datos del stream
-    int N = *C + *I;
-    cout <<"Conductores:"<< *C << " Items:" << *I << " Capacidad Botes:" << *b << endl;
-
-    // leer la segunda linea
-    getline(*input, line);
-    *cantidadRestriccionesIzq = atoi(line.c_str()); // c_str convierte el string a un arreglo de caracteres
-    
-    restriccionesIzq = new unsigned int[*cantidadRestriccionesIzq]; 
-    fillRestrMatrix(restriccionesIzq, *cantidadRestriccionesIzq, input, false);
-
-    getline(*input, line);
-    *cantidadRestriccionesDer=atoi(line.c_str()); // c_str convierte el string a un arreglo de caracteres
-    restriccionesDer = new unsigned int[*cantidadRestriccionesDer]; 
-    fillRestrMatrix(restriccionesDer, *cantidadRestriccionesDer, input, true);
-
-    input->close();
-
-    // veamos como quedan las matrices
-    cout<<"Restricciones Izq:"<<endl;
-    for(int i=0;i < *cantidadRestriccionesIzq;i++)
-    {
-        printBits(restriccionesIzq[i]);
-    }
-
-    cout<<"Restricciones Der:"<<endl;
-    for(int i=0;i < *cantidadRestriccionesDer;i++)
-    {
-        printBits(restriccionesDer[i]);
+    while (!ss.eof()) { // mientras no termine esta linea
+        int a;
+        ss >> a;
+        restrMatrix[i][a-1] = 1; // recuerden que los elementos de los archivos empiezan en 1, pero los indices en 0
+        cout << a << " ";
     }
     cout << endl;
-    return true;
+    }
 }

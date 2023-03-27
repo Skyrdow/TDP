@@ -1,4 +1,4 @@
-
+#pragma once
 class State
 {
 private:
@@ -19,6 +19,7 @@ public:
     State *boatMove(int movingArray[], int arrLength);
     State *copy();
     void print();
+    void printPath();
 
     void swapBoatSide();
 };
