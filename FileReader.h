@@ -13,7 +13,6 @@ public:
     FileReader(/* args */);
     ~FileReader();
 
-    void fillRestrMatrix(int **restrMatrix, int restrCount);
     void fillLeftMatrix(unsigned int *restrMatrix, int restrCount);
     void fillRightMatrix(unsigned int *restrMatrix, int restrCount);
     void readCountLine();

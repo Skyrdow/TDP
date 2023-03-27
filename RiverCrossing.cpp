@@ -142,5 +142,4 @@ void RiverCrossing::solve(const char *fileName)
     }
     cout << "No hay solucion" << endl;
 
-    
 }

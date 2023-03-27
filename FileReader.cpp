@@ -100,20 +100,3 @@ void FileReader::fillRightMatrix(unsigned int *restrMatrix, int restrCount)
         }
     }
 }
-void FileReader::fillRestrMatrix(int **restrMatrix, int restrCount)
-{
-    string line;
-    stringstream ss;
-    for (int i = 0; i < restrCount; i++) {
-    getline(*this->inputFile, line);
-    ss.clear(); // limpiar el stream de caracteres
-    ss << line; // copiar la linea al stream
-    while (!ss.eof()) { // mientras no termine esta linea
-        int a;
-        ss >> a;
-        restrMatrix[i][a-1] = 1; // recuerden que los elementos de los archivos empiezan en 1, pero los indices en 0
-        cout << a << " ";
-    }
-    cout << endl;
-    }
-}
