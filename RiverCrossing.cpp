@@ -10,17 +10,17 @@ RiverCrossing::RiverCrossing(){}
 void RiverCrossing::printInfo()
 {
     cout<<"Restricciones Izq:"<<endl;
-    for(int i = 0; i < leftRestrictionCount; i++)
+    for(int i = 0; i < this->leftRestrictionCount; i++)
     {
-        std::bitset<sizeof(int)*8> A = leftRestrictionMatrix[i]; 
+        std::bitset<sizeof(int)*8> A = this->leftRestrictionMatrix[i]; 
         cout << A << endl;
     }
     cout << endl;
 
     cout<<"Restricciones Der:"<<endl;
-    for(int i = 0; i < rightRestrictionCount; i++)
+    for(int i = 0; i < this->rightRestrictionCount; i++)
     {
-        std::bitset<sizeof(int)*8> A = rightRestrictionMatrix[i];
+        std::bitset<sizeof(int)*8> A = this->rightRestrictionMatrix[i];
         cout << A << endl;
     }
     cout << endl;
@@ -40,7 +40,7 @@ void RiverCrossing::calculateFinalState(int totalItemCount)
 
 bool RiverCrossing::isFinalState(State *checkState)
 {
-    if (checkState->rightSide == finalStateValue)
+    if (checkState->rightSide == this->finalStateValue)
         return true;
     return false;
 }
@@ -48,14 +48,14 @@ bool RiverCrossing::isFinalState(State *checkState)
 bool RiverCrossing::isValidState(State *checkState)
 {
     unsigned int leftSide = ~(checkState->rightSide);
-    for (int i = 0; i < leftRestrictionCount; i++)
+    for (int i = 0; i < this->leftRestrictionCount; i++)
     {
-        if (leftSide == leftRestrictionMatrix[i])
+        if (leftSide == this->leftRestrictionMatrix[i])
             return false;
     }
-    for (int i = 0; i < rightRestrictionCount; i++)
+    for (int i = 0; i < this->rightRestrictionCount; i++)
     {
-        if (checkState->rightSide == rightRestrictionMatrix[i])
+        if (checkState->rightSide == this->rightRestrictionMatrix[i])
             return false;
     }
     return true;
@@ -84,18 +84,18 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
     {
         fr->readCountLine();
 
-        driverCount = fr->getDriverCount();
-        itemCount = fr->getItemCount();
-        boatSize = fr->getBoatSize();
+        this->driverCount = fr->getDriverCount();
+        this->itemCount = fr->getItemCount();
+        this->boatSize = fr->getBoatSize();
         calculateFinalState(driverCount + itemCount);
 
-        leftRestrictionCount = fr->readRestrictionSize();
-        leftRestrictionMatrix = new unsigned int[leftRestrictionCount];
-        fr->fillLeftMatrix(leftRestrictionMatrix, leftRestrictionCount);
+        this->leftRestrictionCount = fr->readRestrictionSize();
+        this->leftRestrictionMatrix = new unsigned int[this->leftRestrictionCount];
+        fr->fillLeftMatrix(this->leftRestrictionMatrix, this->leftRestrictionCount);
 
         rightRestrictionCount = fr->readRestrictionSize();
-        rightRestrictionMatrix = new unsigned int[rightRestrictionCount];
-        fr->fillRightMatrix(rightRestrictionMatrix, rightRestrictionCount);
+        this->rightRestrictionMatrix = new unsigned int[this->rightRestrictionCount];
+        fr->fillRightMatrix(this->rightRestrictionMatrix, this->rightRestrictionCount);
         
         printInfo();
         delete fr;
@@ -111,7 +111,7 @@ void RiverCrossing::solve(const char *fileName)
     if (!getProblemInfo(fileName))
         return;
 
-    int totalItemsCount = driverCount+itemCount;
+    int totalItemsCount = this->driverCount+this->itemCount;
     // Estado [0, 0, 0, ..., 0]
     State *currentState = new State(totalItemsCount);
     open = new Heap(2);
@@ -127,17 +127,9 @@ void RiverCrossing::solve(const char *fileName)
         closed->push(s);
         
         if (canMove(s, 2)) {
-            cout << "Puedo mover 2 de:" << endl;
-            s->print();
             State *s1 = s->boatMove(nullptr, 0);
-            cout << "quedando:" << endl;
-            s1->print();
             if (!closed->search(s1->rightSide) && !open->search(s1->rightSide))
                 open->push(s1);
-            else {
-                cout << "No se agrega L" << endl;
-                delete s1;
-            }
         }
     }
     cout << "No hay solucion" << endl;

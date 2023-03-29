@@ -2,6 +2,8 @@
 #include <iostream>
 #include <bitset>
 
+/// @brief Constructor de State, distintas versiones aplican valores por defecto
+/// @param stateSize cantidad de objetos
 State::State(int stateSize)
 {
     this->stateSize = stateSize;
@@ -9,7 +11,9 @@ State::State(int stateSize)
     this->rightSide = 0; // [0, 0, 0, ..., 0]
     this->previousState = nullptr;
 }
-
+/// @brief Constructor de State, distintas versiones aplican valores por defecto
+/// @param right numero entero sin signo que representa todos los objetos
+/// @param stateSize tamaño del State
 State::State(int right, int stateSize)
 {
     this->stateSize = stateSize;
@@ -18,6 +22,10 @@ State::State(int right, int stateSize)
     this->previousState = nullptr;
 }
 
+/// @brief Constructor de State, distintas versiones aplican valores por defecto
+/// @param right numero entero sin signo que representa todos los objetos
+/// @param stateSize tamaño del State
+/// @param newBoatSide lado en el que se encuentra el bote
 State::State(int right, int stateSize, boatSide newBoatSide)
 {
     this->stateSize = stateSize;
@@ -26,6 +34,7 @@ State::State(int right, int stateSize, boatSide newBoatSide)
     this->previousState = nullptr;
 }
 
+/// @brief Muestra por consola el State actual
 void State::print()
 {
     // A will hold the binary representation of N 
@@ -33,6 +42,8 @@ void State::print()
     std::cout << A << std::endl;
 }
 
+/// @brief Copia los valores del State
+/// @return State nuevo con los mismos valores
 State *State::copy()
 {
     return new State(
@@ -41,6 +52,7 @@ State *State::copy()
         this->currentBoatSide);
 }
 
+/// @brief Cambia el lado del bote
 void State::swapBoatSide()
 {
     if (this->currentBoatSide == boatSide::left)
@@ -49,6 +61,10 @@ void State::swapBoatSide()
         this->currentBoatSide = boatSide::left;
 }
 
+/// @brief Mueve los elementos de lado, sin preocuparse si el elemento se puede mover o si el State resultante será válido
+/// @param movingArray arreglo con las posiciones de los objetos a mover
+/// @param arrLength largo del arreglo
+/// @return State nuevo con los elementos modificados
 State *State::boatMove(int movingArray[], int arrLength)
 {
     State *newState = this->copy();

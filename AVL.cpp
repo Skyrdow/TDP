@@ -1,7 +1,5 @@
 #include <iostream>
 #include "AVL.h"
-#include <queue>
-#include <unordered_map>
 using namespace std;
 
 AVL::AVL()
@@ -147,52 +145,6 @@ node *AVL::insert(node *r, State *data)
     }
 
     return r;
-}
-
-void AVL::levelorder_newline()
-{
-    if (this->root == NULL)
-    {
-        cout << "\n"
-             << "Empty tree"
-             << "\n";
-        return;
-    }
-    levelorder_newline(this->root);
-}
-
-void AVL::levelorder_newline(node *v)
-{
-    queue<node *> q;
-    node *cur;
-    q.push(v);
-    q.push(NULL);
-
-    while (!q.empty())
-    {
-        cur = q.front();
-        q.pop();
-        if (cur == NULL && q.size() != 0)
-        {
-            cout << "\n";
-
-            q.push(NULL);
-            continue;
-        }
-        if (cur != NULL)
-        {
-            cur->data->print();
-
-            if (cur->left != NULL)
-            {
-                q.push(cur->left);
-            }
-            if (cur->right != NULL)
-            {
-                q.push(cur->right);
-            }
-        }
-    }
 }
 
 node *AVL::deleteNode(node *p, int data)

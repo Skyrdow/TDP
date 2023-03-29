@@ -17,7 +17,9 @@ FileReader::~FileReader()
 {
     this->inputFile->close();
 }
-
+/// @brief Abre el archivo
+/// @param fileName nombre del archivo
+/// @return true si se abre correctamente, en caso contrario, false
 bool FileReader::openFile(const char *fileName)
 {
     this->inputFile = new ifstream(fileName); // abrir el archivo
@@ -31,7 +33,7 @@ bool FileReader::openFile(const char *fileName)
     return false;
     
 }
-
+/// @brief Lee la linea que contiene la cantidad de elementos
 void FileReader::readCountLine()
 {
     // leer la primera linea
@@ -47,10 +49,15 @@ void FileReader::readCountLine()
          << endl;
 }
 
+/// @brief Getter de la cantidad de conductores
 int FileReader::getDriverCount() { return this->driverCount; }
+/// @brief Getter de la cantidad de items
 int FileReader::getItemCount() { return this->itemCount; }
+/// @brief Getter del tamaño del bote
 int FileReader::getBoatSize() { return this->boatSize; }
 
+/// @brief Lee la cantidad máxima de restricciónes para la matriz
+/// @return el valor leído
 int FileReader::readRestrictionSize()
 {
     // leer la segunda linea
@@ -60,6 +67,9 @@ int FileReader::readRestrictionSize()
     return atoi(line.c_str()); 
 }
 
+/// @brief Rellena la matriz izquierda de restricciones
+/// @param restrMatrix matriz con memoria ya asignada, esta se modifica
+/// @param restrCount cantidad de restricciones
 void FileReader::fillLeftMatrix(unsigned int *restrMatrix, int restrCount)
 {
     string line;
@@ -81,6 +91,10 @@ void FileReader::fillLeftMatrix(unsigned int *restrMatrix, int restrCount)
         restrMatrix[i] = ~restrMatrix[i];
     }
 }
+
+/// @brief Rellena la matriz izquierda de restricciones
+/// @param restrMatrix matriz con memoria ya asignada, esta se modifica
+/// @param restrCount cantidad de restricciones
 void FileReader::fillRightMatrix(unsigned int *restrMatrix, int restrCount)
 {
     string line;
