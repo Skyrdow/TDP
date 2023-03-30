@@ -1,12 +1,19 @@
 #include <iostream>
 #include "AVL.h"
+#include <queue>
+#include <unordered_map>
 using namespace std;
 
 AVL::AVL()
 {
     this->root = NULL;
 }
-int AVL::calheight(node *p)
+
+AVL::~AVL()
+{
+}
+
+int AVL::calheight(Node *p)
 {
 
     if (p->left && p->right)
@@ -27,7 +34,7 @@ int AVL::calheight(node *p)
     return 0;
 }
 
-int AVL::bf(node *n)
+int AVL::bf(Node *n)
 {
     if (n->left && n->right)
     {
@@ -44,10 +51,10 @@ int AVL::bf(node *n)
     return 0;
 }
 
-node *AVL::llrotation(node *n)
+Node *AVL::llrotation(Node *n)
 {
-    node *p;
-    node *tp;
+    Node *p;
+    Node *tp;
     p = n;
     tp = p->left;
 
@@ -57,10 +64,10 @@ node *AVL::llrotation(node *n)
     return tp;
 }
 
-node *AVL::rrrotation(node *n)
+Node *AVL::rrrotation(Node *n)
 {
-    node *p;
-    node *tp;
+    Node *p;
+    Node *tp;
     p = n;
     tp = p->right;
 
@@ -70,11 +77,11 @@ node *AVL::rrrotation(node *n)
     return tp;
 }
 
-node *AVL::rlrotation(node *n)
+Node *AVL::rlrotation(Node *n)
 {
-    node *p;
-    node *tp;
-    node *tp2;
+    Node *p;
+    Node *tp;
+    Node *tp2;
     p = n;
     tp = p->right;
     tp2 = p->right->left;
@@ -87,11 +94,11 @@ node *AVL::rlrotation(node *n)
     return tp2;
 }
 
-node *AVL::lrrotation(node *n)
+Node *AVL::lrrotation(Node *n)
 {
-    node *p;
-    node *tp;
-    node *tp2;
+    Node *p;
+    Node *tp;
+    Node *tp2;
     p = n;
     tp = p->left;
     tp2 = p->left->right;
@@ -104,13 +111,13 @@ node *AVL::lrrotation(node *n)
     return tp2;
 }
 
-node *AVL::insert(node *r, State *data)
+Node *AVL::insert(Node *r, State *data)
 {
 
     if (r == NULL)
     {
-        node *n;
-        n = new node;
+        Node *n;
+        n = new Node;
         n->data = data;
         r = n;
         r->left = r->right = NULL;
@@ -147,7 +154,53 @@ node *AVL::insert(node *r, State *data)
     return r;
 }
 
-node *AVL::deleteNode(node *p, int data)
+void AVL::levelorder_newline()
+{
+    if (this->root == NULL)
+    {
+        cout << "\n"
+             << "Empty tree"
+             << "\n";
+        return;
+    }
+    levelorder_newline(this->root);
+}
+
+void AVL::levelorder_newline(Node *v)
+{
+    queue<Node *> q;
+    Node *cur;
+    q.push(v);
+    q.push(NULL);
+
+    while (!q.empty())
+    {
+        cur = q.front();
+        q.pop();
+        if (cur == NULL && q.size() != 0)
+        {
+            cout << "\n";
+
+            q.push(NULL);
+            continue;
+        }
+        if (cur != NULL)
+        {
+            cur->data->print();
+
+            if (cur->left != NULL)
+            {
+                q.push(cur->left);
+            }
+            if (cur->right != NULL)
+            {
+                q.push(cur->right);
+            }
+        }
+    }
+}
+
+Node *AVL::deleteNode(Node *p, int data)
 {
 
     if (p->left == NULL && p->right == NULL)
@@ -158,8 +211,8 @@ node *AVL::deleteNode(node *p, int data)
         return NULL;
     }
 
-    node *t;
-    node *q;
+    Node *t;
+    Node *q;
     if (p->data->rightSide < data)
     {
         p->right = deleteNode(p->right, data);
@@ -212,14 +265,14 @@ node *AVL::deleteNode(node *p, int data)
     return p;
 }
 
-node *AVL::inpre(node *p)
+Node *AVL::inpre(Node *p)
 {
     while (p->right != NULL)
         p = p->right;
     return p;
 }
 
-node *AVL::insuc(node *p)
+Node *AVL::insuc(Node *p)
 {
     while (p->left != NULL)
         p = p->left;
@@ -227,11 +280,11 @@ node *AVL::insuc(node *p)
     return p;
 }
 
-bool AVL::search(node *n, int value)
+bool AVL::search(Node *n, unsigned int value)
 {
     if (n == NULL)
         return false;
-    int nodeVal = n->data->rightSide;
+    unsigned int nodeVal = n->data->rightSide;
     if (nodeVal == value)
         return true;
     if (nodeVal > value)
@@ -241,56 +294,19 @@ bool AVL::search(node *n, int value)
     return false;
 }
 
-AVL::~AVL()
+bool AVL::isEmpty()
 {
+    if (this->root == NULL)
+        return true;
+    return false;
 }
 
-int main()
+void AVL::push(State *insert)
 {
+    this->root = this->insert(this->root, insert);
+}
 
-    AVL b;
-    int c, x;
-
-
-    do
-    {
-
-        State *a;
-        cout << "\n1.Display levelorder on newline";
-        cout << "\n2.Insert";
-        cout << "\n3.Delete\n";
-        cout << "\n0.Exit\n";
-        cout << "\nChoice: ";
-
-        cin >> c;
-
-        switch (c)
-        {
-        case 1:
-            b.levelorder_newline();
-            // to print the tree in level order
-            break;
-
-        case 2:
-            cout << "\nEnter no. ";
-            cin >> x;
-            a = new State(x, 10);
-            b.root = b.insert(b.root, a);
-            break;
-        case 3:
-            cout << "\nWhat to delete? ";
-            cin >> x;
-            b.root = b.deleteNode(b.root, x);
-            break;
-        case 4:
-            cout << "\nWhat to search? ";
-            cin >> x;
-            cout << (b.search(b.root, x) ? "true" : "false");
-            break;
-
-        case 0:
-            break;
-        }
-
-    } while (c != 0);
+void AVL::deleteState(unsigned int value)
+{
+    this->root = this->deleteNode(this->root, value);
 }

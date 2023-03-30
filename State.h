@@ -1,4 +1,5 @@
 #pragma once
+#define MAX_BITSIZE 32
 class State
 {
 private:

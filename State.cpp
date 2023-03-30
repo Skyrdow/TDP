@@ -38,7 +38,7 @@ State::State(int right, int stateSize, boatSide newBoatSide)
 void State::print()
 {
     // A will hold the binary representation of N 
-    std::bitset<sizeof(int)*8> A = this->rightSide;
+    std::bitset<MAX_BITSIZE> A = this->rightSide;
     std::cout << A << std::endl;
 }
 

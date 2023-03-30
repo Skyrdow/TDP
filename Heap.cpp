@@ -54,7 +54,7 @@ void Heap::push(State *s) {
     int i = size-1;
     while (i > 0) {
         int p = parent_idx(i);
-        if (data[i]->rightSide < data[p]->rightSide) {
+        if (data[i]->rightSide > data[p]->rightSide) {
             swap(i, p);
             i = p;
         } else {
@@ -66,16 +66,16 @@ void Heap::push(State *s) {
 void Heap::heapify(int i) {
     int l = left_idx(i);
     int r = right_idx(i);
-    int smallest = i;
-    if (l < size && data[l]->rightSide < data[i]->rightSide) {
-        smallest = l;
+    int biggest = i;
+    if (l < size && data[l]->rightSide > data[i]->rightSide) {
+        biggest = l;
     }
-    if (r < size && data[r]->rightSide < data[smallest]->rightSide) {
-        smallest = r;
+    if (r < size && data[r]->rightSide > data[biggest]->rightSide) {
+        biggest = r;
     }
-    if (smallest != i) {
-        swap(i, smallest);
-        heapify(smallest);
+    if (biggest != i) {
+        swap(i, biggest);
+        heapify(biggest);
     }
 }
 

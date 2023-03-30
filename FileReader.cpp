@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <bitset>
 #include "FileReader.h"
 
 using namespace std;
