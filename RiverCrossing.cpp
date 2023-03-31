@@ -64,6 +64,7 @@ void RiverCrossing::sortOperations()
 {
     quickSort(this->operationHeap, 0, this->operationTotal-1);
 }
+
 RiverCrossing::RiverCrossing()
 {
     this->openAVL = new AVL();
@@ -87,18 +88,6 @@ void RiverCrossing::printInfo()
         cout << A << endl;
     }
     cout << endl;
-}
-
-void RiverCrossing::calculateFinalState(int totalItemCount)
-{
-    unsigned int finalState = 0;
-    for (int i = 0; i < totalItemCount; i++)
-    {
-        finalState += 1 << i;
-    }
-    this->finalStateValue = finalState;
-    bitset<MAX_BITSIZE> bitFinalState(finalState);
-    cout << "Condición final: \n" << bitFinalState << endl << endl;
 }
 
 bool RiverCrossing::isFinalState(State *checkState)
@@ -127,27 +116,24 @@ bool RiverCrossing::isValidState(unsigned int checkState)
 
 bool RiverCrossing::canMove(State *checkState, unsigned int move)
 {
-    // revisar conductor
-    
-    cout << bitset<32>(checkState->rightSide) << "|";
+    // revisar conductor, debe haber al menos 1
+    if ((this->driverCheck & move) == 0);
+        return false;
+
     if (checkState->currentBoatSide == State::boatSide::right)
     {
-    cout << bitset<32>(move) << endl;
-    cout << (checkState->rightSide & move) << endl;
         move = ~move;
         if ((checkState->rightSide & move) == move)
             return true;
     }
     else if ((~(checkState->rightSide) & move) == move)
     {
-    cout << (~checkState->rightSide & move) << endl;
         return true;
     }
     
     return false;
 
 }
-
 
 bool RiverCrossing::getProblemInfo(const char *fileName)
 {
@@ -160,7 +146,13 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
         this->itemCount = fr->getItemCount();
         this->totalItemCount = driverCount + itemCount;
         this->boatSize = fr->getBoatSize();
-        calculateFinalState(driverCount + itemCount);
+        
+        this->finalStateValue = (1 << this->totalItemCount) - 1;
+        
+        // bitset<MAX_BITSIZE> bitFinalState(this->finalStateValue);
+        // cout << "Condición final: \n" << bitFinalState << endl << endl;
+        
+        this->driverCheck = (1 << this->driverCount) - 1;
 
         this->leftRestrictionCount = fr->readRestrictionSize();
         this->leftRestrictionMatrix = new unsigned int[this->leftRestrictionCount];
@@ -169,6 +161,8 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
         rightRestrictionCount = fr->readRestrictionSize();
         this->rightRestrictionMatrix = new unsigned int[this->rightRestrictionCount];
         fr->fillRightMatrix(this->rightRestrictionMatrix, this->rightRestrictionCount);
+        
+        genOperations();
         
         printInfo();
         delete fr;
@@ -203,7 +197,6 @@ void RiverCrossing::solve(const char *fileName)
         return;
     // Estado [0, 0, 0, ..., 0]
     State *currentState = new State(this->totalItemCount);
-    genOperations();
     for (int i = 0; i < this->operationTotal; i++)
     {
         cout << this->operationHeap[i]->result << " ";
@@ -222,15 +215,20 @@ void RiverCrossing::solve(const char *fileName)
         int bottomBound = this->operationTotal-this->operationSize;
         for (unsigned int i = this->operationTotal-1; bottomBound < i; i--)
         {
-        cout << this->operationHeap[i]->result << " ";
-        cout << s->rightSide << " ";
-        cout << (s->rightSide & this->operationHeap[i]->result) << " ";
-    cout << endl;
+            // cout << "i:"  << i << endl;
+            // cout << this->operationHeap[i]->result << " ";
+            // cout << s->rightSide << " ";
+            // cout << endl;
             if (canMove(s, this->operationHeap[i]->result))
             {
+                // cout << bitset<32>(s->rightSide) << "|";
+                // cout << bitset<32>(this->operationHeap[i]->result) << endl;
                 State *s1 = s->boatMove(this->operationHeap[i]->result);
+                // cout << bitset<32>(s1->rightSide) << "|";
                 if (!closedAVL->searchValue(s1->rightSide) && !this->openAVL->searchValue(s1->rightSide))
+                {
                     this->openAVL->push(s1);
+                }
             }
         }
     }

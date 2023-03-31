@@ -207,7 +207,7 @@ Node *AVL::deleteNode(Node *p, int data)
     {
         if (p == this->root)
             this->root = NULL;
-        delete p;
+        // delete p;
         return NULL;
     }
 
@@ -265,6 +265,7 @@ Node *AVL::deleteNode(Node *p, int data)
     return p;
 }
 
+/// @brief retorna el elemento max
 Node *AVL::inpre(Node *p)
 {
     while (p->right != NULL)
@@ -272,6 +273,7 @@ Node *AVL::inpre(Node *p)
     return p;
 }
 
+/// @brief retorna el elemento min
 Node *AVL::insuc(Node *p)
 {
     while (p->left != NULL)
@@ -317,7 +319,7 @@ void AVL::deleteState(unsigned int value)
 
 State *AVL::pop()
 {
-    State *ret = this->root->data;
+    State *ret = this->inpre(this->root)->data;
     deleteState(ret->rightSide);
     return ret;
 }

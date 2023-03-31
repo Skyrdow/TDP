@@ -12,6 +12,7 @@ public:
     int itemCount;
     int totalItemCount;
     int boatSize;
+    unsigned int driverCheck;
     unsigned int finalStateValue;
 
     int leftRestrictionCount;
@@ -36,7 +37,6 @@ public:
     
 
     void sortOperations();
-    void calculateFinalState(int totalItemCount);
     void printInfo();
     bool getProblemInfo(const char *fileName);
     void genOperations();
