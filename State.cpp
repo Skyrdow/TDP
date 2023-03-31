@@ -65,18 +65,21 @@ void State::swapBoatSide()
 /// @param movingArray arreglo con las posiciones de los objetos a mover
 /// @param arrLength largo del arreglo
 /// @return State nuevo con los elementos modificados
-State *State::boatMove(int movingArray[], int arrLength)
+State *State::boatMove(int moving)
 {
     State *newState = this->copy();
-    int movingItem; // potencia de 2 a mover
-    int movingDirection; // R->L (-), L->R (+)
-    for (int i = 0; i < arrLength; i++)
+    if (this->currentBoatSide == boatSide::right)
     {
-        movingItem = 1 << movingArray[i] - 1;
-        movingDirection = static_cast<int>(this->currentBoatSide) ? -1 : 1; // enum boatSide: L=0, R=1
-        newState->rightSide = newState->rightSide + (movingItem * movingDirection);
+        moving = ~moving;
+        newState->rightSide = newState->rightSide & moving;
     }
+    else
+    {
+        newState->rightSide = newState->rightSide | moving;
+    }
+
     newState->swapBoatSide();
+    newState->previousState = this;
     return newState;
 }
 

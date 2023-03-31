@@ -19,10 +19,12 @@ public:
     unsigned int *leftRestrictionMatrix;
     unsigned int *rightRestrictionMatrix;
 
-    Heap *openHeap;
+    AVL *openAVL;
     AVL *closedAVL;
 
     Operation **operationHeap;
+    unsigned int operationTotal;
+    unsigned int operationSize;
 
     RiverCrossing();
     ~RiverCrossing();
@@ -32,6 +34,8 @@ public:
     bool isValidState(unsigned int checkState);
     bool canMove(State *checkState, unsigned int move);
     
+
+    void sortOperations();
     void calculateFinalState(int totalItemCount);
     void printInfo();
     bool getProblemInfo(const char *fileName);

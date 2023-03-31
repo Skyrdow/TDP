@@ -280,6 +280,10 @@ Node *AVL::insuc(Node *p)
     return p;
 }
 
+bool AVL::searchValue(unsigned int value)
+{
+    return this->search(this->root, value);
+}
 bool AVL::search(Node *n, unsigned int value)
 {
     if (n == NULL)
@@ -309,4 +313,11 @@ void AVL::push(State *insert)
 void AVL::deleteState(unsigned int value)
 {
     this->root = this->deleteNode(this->root, value);
+}
+
+State *AVL::pop()
+{
+    State *ret = this->root->data;
+    deleteState(ret->rightSide);
+    return ret;
 }

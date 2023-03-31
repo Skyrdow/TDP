@@ -1,8 +1,9 @@
 #include "Operation.h"
 
-Operation::Operation(int rightSideCount)
+Operation::Operation()
 {
-    this->rightSideCount = rightSideCount;
+    this->rightSideCount = 0;
+    this->result = 0;
 }
 
 Operation::~Operation()

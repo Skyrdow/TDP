@@ -8,6 +8,6 @@ private:
 public:
     int rightSideCount;
     unsigned int result;
-    Operation(int rightSideCount);
+    Operation();
     ~Operation();
 };

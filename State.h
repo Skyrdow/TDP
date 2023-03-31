@@ -17,7 +17,7 @@ public:
     State(int right, int stateSize, boatSide newBoatSide);
     ~State();
     
-    State *boatMove(int movingArray[], int arrLength);
+    State *boatMove(int moving);
     State *copy();
     void print();
     void printPath();

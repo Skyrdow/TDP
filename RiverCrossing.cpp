@@ -6,64 +6,68 @@
 using namespace std;
 
 // https://www.geeksforgeeks.org/cpp-program-for-quicksort/
-int partition(Operation** arr, int start, int end)
-{  
-      // assuming last element as pivotElement
-    int index = 0, pivotElement = arr[end]->rightSideCount, pivotIndex;
-    Operation **temp = new Operation*[end - start + 1]; // making an array whose size is equal to current partition range...
-    for (int i = start; i <= end; i++) // pushing all the elements in temp which are smaller than pivotElement
-    {
-        if(arr[i]->rightSideCount < pivotElement)
-        {
-            temp[index]->rightSideCount = arr[i]->rightSideCount;
-            index++;
-        }
-    }
- 
-    temp[index]->rightSideCount = pivotElement; // pushing pivotElement in temp
-    index++;
- 
-    for (int i = start; i < end; i++) // pushing all the elements in temp which are greater than pivotElement
-    {
-        if(arr[i]->rightSideCount > pivotElement)
-        {
-            temp[index] = arr[i];
-            index++;
-        }
-    }
-  // all the elements now in temp array are order :
-  // leftmost elements are lesser than pivotElement and rightmost elements are greater than pivotElement
-               
-    index = 0;
-    for (int i = start; i <= end; i++) // copying all the elements to original array i.e arr
-    {  
-        if(arr[i]->rightSideCount == pivotElement)
-        {
-              // for getting pivot index in the original array.
-              // we need the pivotIndex value in the original and not in the temp array
-            pivotIndex = i;
-        }
-        arr[i]->rightSideCount = temp[index]->rightSideCount;
-        index++;
-    }
-    return pivotIndex; // returning pivotIndex
-}
- 
-void quickSort(Operation** arr, int start, int end)
-{ 
-    if(start < end)
-    {  
-        int partitionIndex = partition(arr, start, end); // for getting partition
-        quickSort(arr, start, partitionIndex - 1); // sorting left side array
-        quickSort(arr, partitionIndex + 1, end); // sorting right side array
-    }
-    return;
+
+unsigned int partition(Operation *arr[], unsigned int start, unsigned int end)
+{
+
+	Operation *pivot = arr[start];
+
+	unsigned int count = 0;
+	for (unsigned int i = start + 1; i <= end; i++) {
+		if (arr[i]->rightSideCount <= pivot->rightSideCount)
+			count++;
+	}
+
+	// Giving pivot element its correct position
+	unsigned int pivotIndex = start + count;
+	swap(arr[pivotIndex], arr[start]);
+
+	// Sorting left and right parts of the pivot element
+	unsigned int i = start, j = end;
+
+	while (i < pivotIndex && j > pivotIndex) {
+
+		while (arr[i]->rightSideCount <= pivot->rightSideCount) {
+			i++;
+		}
+
+		while (arr[j]->rightSideCount > pivot->rightSideCount) {
+			j--;
+		}
+
+		if (i < pivotIndex && j > pivotIndex) {
+			swap(arr[i++], arr[j--]);
+		}
+	}
+
+	return pivotIndex;
 }
 
+void quickSort(Operation *arr[], unsigned int start, unsigned int end)
+{
+
+	// base case
+	if (start >= end)
+		return;
+
+	// partitioning the array
+	unsigned int p = partition(arr, start, end);
+
+	// Sorting the left part
+	quickSort(arr, start, p - 1);
+
+	// Sorting the right part
+	quickSort(arr, p + 1, end);
+}
+
+void RiverCrossing::sortOperations()
+{
+    quickSort(this->operationHeap, 0, this->operationTotal-1);
+}
 RiverCrossing::RiverCrossing()
 {
-    // this->openHeap = new Heap(2);
-    // this->closedAVL = new AVL();
+    this->openAVL = new AVL();
+    this->closedAVL = new AVL();
 }
 
 void RiverCrossing::printInfo()
@@ -106,6 +110,8 @@ bool RiverCrossing::isFinalState(State *checkState)
 
 bool RiverCrossing::isValidState(unsigned int checkState)
 {
+    if (checkState == 15)
+        cout << "asdasd";
     for (int i = 0; i < this->leftRestrictionCount; i++)
     {
         if (checkState == this->leftRestrictionMatrix[i])
@@ -121,14 +127,23 @@ bool RiverCrossing::isValidState(unsigned int checkState)
 
 bool RiverCrossing::canMove(State *checkState, unsigned int move)
 {
-
-    if (checkState->currentBoatSide == State::boatSide::left)
-        move = ~move;
+    // revisar conductor
     
-    if ((checkState->rightSide & move) == move)
+    cout << bitset<32>(checkState->rightSide) << "|";
+    if (checkState->currentBoatSide == State::boatSide::right)
     {
+    cout << bitset<32>(move) << endl;
+    cout << (checkState->rightSide & move) << endl;
+        move = ~move;
+        if ((checkState->rightSide & move) == move)
+            return true;
+    }
+    else if ((~(checkState->rightSide) & move) == move)
+    {
+    cout << (~checkState->rightSide & move) << endl;
         return true;
     }
+    
     return false;
 
 }
@@ -165,19 +180,20 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
 
 void RiverCrossing::genOperations()
 {
-    int operationTotal = 1 << this->totalItemCount;
+    this->operationTotal = (1 << this->totalItemCount);
+    this->operationSize = 0;
     this->operationHeap = new Operation*[operationTotal];
     for (unsigned int i = 0; i < operationTotal; i++)
     {
-        Operation *op = new Operation(0);
+        Operation *op = new Operation();
         this->operationHeap[i] = op;
         if (!isValidState(i))
             continue;
+        this->operationSize++;
         op->rightSideCount = bitset<MAX_BITSIZE>(i).count();
         op->result = i;
     }
-    quickSort(operationHeap, 0 , operationTotal);
-    
+    sortOperations();
 }
 
 void RiverCrossing::solve(const char *fileName)
@@ -187,22 +203,36 @@ void RiverCrossing::solve(const char *fileName)
         return;
     // Estado [0, 0, 0, ..., 0]
     State *currentState = new State(this->totalItemCount);
-    this->openHeap->push(currentState);
-    while (!this->openHeap->isEmpty()) 
+    genOperations();
+    for (int i = 0; i < this->operationTotal; i++)
     {
-        // State *s = this->operationHeap->pop()->result;
-        // if (isFinalState(s)) {
-        //     cout << "Solucion encontrada" << endl;
-        //     s->print();
-        //     return;
-        // }
-        // closedAVL->push(s);
-        
-        // if (canMove(s, 2)) {
-        //     State *s1 = s->boatMove(nullptr, 0);
-        //     if (!closedAVL->search(this->openAVL->root, s1->rightSide) && !this->openAVL->search(this->openAVL->root, s1->rightSide))
-        //         this->openAVL->push(s1);
-        // }
+        cout << this->operationHeap[i]->result << " ";
+    }
+    cout << endl;
+    this->openAVL->push(currentState);
+    while (!this->openAVL->isEmpty()) 
+    {
+        State *s = this->openAVL->pop();
+        if (isFinalState(s)) {
+            cout << "Solucion encontrada" << endl;
+            s->print();
+            return;
+        }
+        closedAVL->push(s);
+        int bottomBound = this->operationTotal-this->operationSize;
+        for (unsigned int i = this->operationTotal-1; bottomBound < i; i--)
+        {
+        cout << this->operationHeap[i]->result << " ";
+        cout << s->rightSide << " ";
+        cout << (s->rightSide & this->operationHeap[i]->result) << " ";
+    cout << endl;
+            if (canMove(s, this->operationHeap[i]->result))
+            {
+                State *s1 = s->boatMove(this->operationHeap[i]->result);
+                if (!closedAVL->searchValue(s1->rightSide) && !this->openAVL->searchValue(s1->rightSide))
+                    this->openAVL->push(s1);
+            }
+        }
     }
     cout << "No hay solucion" << endl;
 

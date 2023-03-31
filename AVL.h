@@ -23,6 +23,8 @@ public:
     Node *insuc(Node *p);
 
     void push(State *insert);
+    State *pop();
+    bool searchValue(unsigned int value);
     void deleteState(unsigned int value);
     bool search(Node *n, unsigned int value);
     bool isEmpty();
