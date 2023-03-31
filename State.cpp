@@ -2,6 +2,11 @@
 #include <iostream>
 #include <bitset>
 
+State::~State()
+{
+    
+}
+
 /// @brief Constructor de State, distintas versiones aplican valores por defecto
 /// @param stateSize cantidad de objetos
 State::State(int stateSize)
@@ -38,8 +43,9 @@ State::State(int right, int stateSize, boatSide newBoatSide)
 void State::print()
 {
     // A will hold the binary representation of N 
-    std::bitset<MAX_BITSIZE> A = this->rightSide;
-    std::cout << A << std::endl;
+    if (this->previousState != nullptr)
+        this->previousState->print();
+    std::cout << std::bitset<MAX_BITSIZE>(this->rightSide) << std::endl;
 }
 
 /// @brief Copia los valores del State

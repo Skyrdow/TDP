@@ -7,7 +7,7 @@ using namespace std;
 
 // https://www.geeksforgeeks.org/cpp-program-for-quicksort/
 
-unsigned int partition(Operation *arr[], unsigned int start, unsigned int end)
+unsigned int RiverCrossing::partition(Operation *arr[], unsigned int start, unsigned int end)
 {
 
 	Operation *pivot = arr[start];
@@ -43,7 +43,7 @@ unsigned int partition(Operation *arr[], unsigned int start, unsigned int end)
 	return pivotIndex;
 }
 
-void quickSort(Operation *arr[], unsigned int start, unsigned int end)
+void RiverCrossing::quickSort(Operation *arr[], unsigned int start, unsigned int end)
 {
 
 	// base case
@@ -69,6 +69,14 @@ RiverCrossing::RiverCrossing()
 {
     this->openAVL = new AVL();
     this->closedAVL = new AVL();
+}
+RiverCrossing::~RiverCrossing()
+{
+    delete[](this->operationHeap);
+    delete[](this->leftRestrictionMatrix);
+    delete[](this->rightRestrictionMatrix);
+    delete(this->openAVL);
+    delete(this->closedAVL);
 }
 
 void RiverCrossing::printInfo()
@@ -99,8 +107,6 @@ bool RiverCrossing::isFinalState(State *checkState)
 
 bool RiverCrossing::isValidState(unsigned int checkState)
 {
-    if (checkState == 15)
-        cout << "asdasd";
     for (int i = 0; i < this->leftRestrictionCount; i++)
     {
         if (checkState == this->leftRestrictionMatrix[i])
@@ -117,18 +123,22 @@ bool RiverCrossing::isValidState(unsigned int checkState)
 bool RiverCrossing::canMove(State *checkState, unsigned int move)
 {
     // revisar conductor, debe haber al menos 1
-    if ((this->driverCheck & move) == 0);
+    if ((this->driverCheck & move) == 0)
+        return false;
+
+    // revisar bote
+    if (bitset<MAX_BITSIZE>(move).count() > this->boatSize)
         return false;
 
     if (checkState->currentBoatSide == State::boatSide::right)
     {
-        move = ~move;
         if ((checkState->rightSide & move) == move)
             return true;
     }
-    else if ((~(checkState->rightSide) & move) == move)
+    if (checkState->currentBoatSide == State::boatSide::left)
     {
-        return true;
+        if ((~(checkState->rightSide) & move) == move)
+            return true;
     }
     
     return false;
@@ -175,7 +185,6 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
 void RiverCrossing::genOperations()
 {
     this->operationTotal = (1 << this->totalItemCount);
-    this->operationSize = 0;
     this->operationHeap = new Operation*[operationTotal];
     for (unsigned int i = 0; i < operationTotal; i++)
     {
@@ -183,7 +192,6 @@ void RiverCrossing::genOperations()
         this->operationHeap[i] = op;
         if (!isValidState(i))
             continue;
-        this->operationSize++;
         op->rightSideCount = bitset<MAX_BITSIZE>(i).count();
         op->result = i;
     }
@@ -192,46 +200,49 @@ void RiverCrossing::genOperations()
 
 void RiverCrossing::solve(const char *fileName)
 {
+    // int iterations = 0;
     // leer el archivo, pasando las direcciones donde se almacenan las variables relevantes para el problema
     if (!getProblemInfo(fileName))
         return;
     // Estado [0, 0, 0, ..., 0]
     State *currentState = new State(this->totalItemCount);
-    for (int i = 0; i < this->operationTotal; i++)
-    {
-        cout << this->operationHeap[i]->result << " ";
-    }
-    cout << endl;
+    // for (int i = 0; i < this->operationTotal; i++)
+    // {
+    //     cout << this->operationHeap[i]->result << " ";
+    // }
+    // cout << endl;
     this->openAVL->push(currentState);
     while (!this->openAVL->isEmpty()) 
     {
         State *s = this->openAVL->pop();
-        if (isFinalState(s)) {
-            cout << "Solucion encontrada" << endl;
+        // cout << "iterations->" << iterations << endl;
+        // cout << "Open->" << s->rightSide << endl;
+        // cout << "Side->" << (int)s->currentBoatSide << endl;
+        if (isFinalState(s)) 
+        {
+            cout << "Solución encontrada:" << endl;
             s->print();
             return;
         }
         closedAVL->push(s);
-        int bottomBound = this->operationTotal-this->operationSize;
-        for (unsigned int i = this->operationTotal-1; bottomBound < i; i--)
+        // recorrer el arreglo de ops desde el final
+        for (unsigned int i = this->operationTotal - 1; 0 <= i; i--)
         {
-            // cout << "i:"  << i << endl;
-            // cout << this->operationHeap[i]->result << " ";
-            // cout << s->rightSide << " ";
-            // cout << endl;
+            if (this->operationHeap[i]->result == 0)
+                break;
             if (canMove(s, this->operationHeap[i]->result))
             {
-                // cout << bitset<32>(s->rightSide) << "|";
-                // cout << bitset<32>(this->operationHeap[i]->result) << endl;
+                // cout << "probando operacion:"  << this->operationHeap[i]->result << endl;
                 State *s1 = s->boatMove(this->operationHeap[i]->result);
-                // cout << bitset<32>(s1->rightSide) << "|";
+                // cout << "operacion realizada: " << bitset<32>(s1->rightSide) << endl;
                 if (!closedAVL->searchValue(s1->rightSide) && !this->openAVL->searchValue(s1->rightSide))
                 {
                     this->openAVL->push(s1);
                 }
             }
         }
+        // cout << endl;
+        // iterations++;
     }
-    cout << "No hay solucion" << endl;
-
+    cout << "No hay solución" << endl;
 }

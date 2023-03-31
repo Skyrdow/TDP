@@ -11,6 +11,7 @@ AVL::AVL()
 
 AVL::~AVL()
 {
+    delete(this->root);
 }
 
 int AVL::calheight(Node *p)

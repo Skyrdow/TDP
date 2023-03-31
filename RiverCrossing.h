@@ -1,12 +1,13 @@
 #pragma once
 #include "State.h"
 #include "Operation.h"
-#include "Heap.h"
 #include "AVL.h"
 class RiverCrossing
 {
 private:
-    /* data */
+    unsigned int partition(Operation *arr[], unsigned int start, unsigned int end);
+    void quickSort(Operation *arr[], unsigned int start, unsigned int end);
+
 public:
     int driverCount;
     int itemCount;
@@ -25,7 +26,6 @@ public:
 
     Operation **operationHeap;
     unsigned int operationTotal;
-    unsigned int operationSize;
 
     RiverCrossing();
     ~RiverCrossing();
