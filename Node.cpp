@@ -1,12 +1,13 @@
 #include "Node.h"
-#define NULL 0
 
-Node::Node(){};
+Node::Node(State *key, Node* left_node, Node* right_node)
+{
+    key_= key;
+    left_node_ = left_node;
+    right_node_ = right_node;
+    height_ = 0;
+}
 Node::~Node()
 {
-    if (this->left != NULL)
-        delete(this->left);
-    if (this->right != NULL)
-        delete(this->right);
-    delete(this->data);
+
 }

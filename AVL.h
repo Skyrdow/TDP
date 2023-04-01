@@ -1,31 +1,26 @@
 #pragma once
 #include "Node.h"
+#include <iostream>
 
+using namespace std;
 class AVL
 {
 private:
-    
+    Node* root_;
+    Node* right_rotation(Node* p);
+    Node* left_rotation(Node* p);
+    Node* maximum_node_of_tree(Node* node);
+    unsigned int sub_tree_height(Node* node);
+    Node* insert_(State *key, Node* node);
+    Node* pop_(unsigned int key, Node* node);
+
 public:
-    Node * root;
     AVL();
     ~AVL();
-    int calheight(Node *p);
-    int bf(Node *n);
-    Node *llrotation(Node *n);
-    Node *rrrotation(Node *n);
-    Node *rlrotation(Node *n);
-    Node *lrrotation(Node *n);
-    Node *insert(Node *r, State *data);
-    void levelorder_newline();
-    void levelorder_newline(Node *v);
-    Node *deleteNode(Node *p, int data);
-    Node *inpre(Node *p);
-    Node *insuc(Node *p);
-
-    void push(State *insert);
+    void insert(State *key);
+    void deleteState(unsigned int key);
     State *pop();
     bool searchValue(unsigned int value);
-    void deleteState(unsigned int value);
     bool search(Node *n, unsigned int value);
     bool isEmpty();
 };

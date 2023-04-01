@@ -4,24 +4,13 @@
 
 State::~State()
 {
-    
-}
 
-/// @brief Constructor de State, distintas versiones aplican valores por defecto
-/// @param stateSize cantidad de objetos
-State::State(int stateSize)
-{
-    this->stateSize = stateSize;
-    this->currentBoatSide = boatSide::left;
-    this->rightSide = 0; // [0, 0, 0, ..., 0]
-    this->previousState = nullptr;
 }
 /// @brief Constructor de State, distintas versiones aplican valores por defecto
 /// @param right numero entero sin signo que representa todos los objetos
 /// @param stateSize tamaño del State
-State::State(int right, int stateSize)
+State::State(int right)
 {
-    this->stateSize = stateSize;
     this->currentBoatSide = boatSide::left; 
     this->rightSide = right;
     this->previousState = nullptr;
@@ -31,9 +20,8 @@ State::State(int right, int stateSize)
 /// @param right numero entero sin signo que representa todos los objetos
 /// @param stateSize tamaño del State
 /// @param newBoatSide lado en el que se encuentra el bote
-State::State(int right, int stateSize, boatSide newBoatSide)
+State::State(int right, boatSide newBoatSide)
 {
-    this->stateSize = stateSize;
     this->currentBoatSide = newBoatSide;
     this->rightSide = right;
     this->previousState = nullptr;
@@ -54,7 +42,6 @@ State *State::copy()
 {
     return new State(
         this->rightSide, 
-        this->stateSize, 
         this->currentBoatSide);
 }
 

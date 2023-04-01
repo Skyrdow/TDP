@@ -211,7 +211,7 @@ void RiverCrossing::solve(const char *fileName)
     //     cout << this->operationHeap[i]->result << " ";
     // }
     // cout << endl;
-    this->openAVL->push(currentState);
+    this->openAVL->insert(currentState);
     while (!this->openAVL->isEmpty()) 
     {
         State *s = this->openAVL->pop();
@@ -224,7 +224,7 @@ void RiverCrossing::solve(const char *fileName)
             s->print();
             return;
         }
-        closedAVL->push(s);
+        closedAVL->insert(s);
         // recorrer el arreglo de ops desde el final
         for (unsigned int i = this->operationTotal - 1; 0 <= i; i--)
         {
@@ -237,7 +237,7 @@ void RiverCrossing::solve(const char *fileName)
                 // cout << "operacion realizada: " << bitset<32>(s1->rightSide) << endl;
                 if (!closedAVL->searchValue(s1->rightSide) && !this->openAVL->searchValue(s1->rightSide))
                 {
-                    this->openAVL->push(s1);
+                    this->openAVL->insert(s1);
                 }
             }
         }

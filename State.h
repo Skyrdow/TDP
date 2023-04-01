@@ -9,12 +9,10 @@ public:
     // Se usa la representación [0,0,1] = izq(1,2) y der(3)
     // y se transforma a entero para evitar recorrer matrices
     unsigned int rightSide; 
-    int stateSize;
     State *previousState;
 
-    State(int stateSize);
-    State(int right, int stateSize);
-    State(int right, int stateSize, boatSide newBoatSide);
+    State(int right);
+    State(int right, boatSide newBoatSide);
     ~State();
     
     State *boatMove(int moving);
