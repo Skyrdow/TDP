@@ -205,7 +205,7 @@ State *AVL::pop()
 bool AVL::isEmpty()
 {
     if (this->root == nullptr)
-        return false;
-    return true;
+        return true;
+    return false;
 }
 
