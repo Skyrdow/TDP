@@ -15,6 +15,7 @@ FileReader::FileReader(){}
 FileReader::~FileReader()
 {
     this->inputFile->close();
+    delete this->inputFile;
 }
 /// @brief Abre el archivo
 /// @param fileName nombre del archivo
@@ -24,11 +25,12 @@ bool FileReader::openFile(const char *fileName)
     this->inputFile = new ifstream(fileName); // abrir el archivo
     if (this->inputFile->is_open()) 
     {
-        std::cout << "archivo abierto" << std::endl;
+        // std::cout << "archivo abierto" << std::endl;
         return true;
 
     }
-    std::cout << "archivo no encontrado" << std::endl;
+    // std::cout << "archivo no encontrado" << std::endl;
+    delete this->inputFile;
     return false;
     
 }

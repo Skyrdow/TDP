@@ -1,21 +1,34 @@
 #include "../RiverCrossing.h"
 #include <string>
 #include <iostream>
-#include <chrono>
+#include <ctime>
 
 using namespace std;
 
-int main(int argc, char const *argv[])
-{
-	auto start = chrono::steady_clock::now();
+int main() {
+    clock_t t_ini, t_fin;
+    double secs=0;
 
-    RiverCrossing *r = new RiverCrossing();
-    r->solve("test.txt");
-    //  Insert the code that will be timed
+    int k, numVeces;
+    string nombreArchivo;
 
-    auto end = chrono::steady_clock::now();
+    cout << "Cuantas veces quieres que se resuelva el problema? ";
+    cin >> numVeces;
 
-    // Store the time difference between start and end
-    auto diff = end - start;
-    cout << chrono::duration <double, milli> (diff).count() << " ms" << endl;
+    cout << endl << "Indique el nombre de archivo:  " ;
+    cin >> nombreArchivo;
+
+    cout << endl << "Resolviendo el problema " << nombreArchivo <<", "<< numVeces << " veces..." << endl;
+    
+    for (k=0; k<numVeces; k++) {
+        RiverCrossing *r = new RiverCrossing();
+        t_ini = clock();
+        r->solve(nombreArchivo.c_str());
+        t_fin = clock();
+        secs = secs + (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+        // delete r;
+    }
+    cout << endl << "Tiempo promedio: " << secs/numVeces << " segundos" << endl;
+    
+    return 0;
 }

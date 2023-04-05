@@ -70,14 +70,15 @@ RiverCrossing::RiverCrossing()
     this->openAVL = new AVL();
     this->closedAVL = new AVL();
 }
-RiverCrossing::~RiverCrossing()
-{
-    delete[](this->operationHeap);
-    delete[](this->leftRestrictionMatrix);
-    delete[](this->rightRestrictionMatrix);
-    delete(this->openAVL);
-    delete(this->closedAVL);
-}
+
+// RiverCrossing::~RiverCrossing()
+// {
+//     delete[](this->operationHeap);
+//     delete[](this->leftRestrictionMatrix);
+//     delete[](this->rightRestrictionMatrix);
+//     delete(this->openAVL);
+//     delete(this->closedAVL);
+// }
 
 void RiverCrossing::printInfo()
 {
@@ -174,7 +175,7 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
         
         genOperations();
         
-        printInfo();
+        // printInfo();
         delete fr;
         return true;
     }
@@ -200,12 +201,12 @@ void RiverCrossing::genOperations()
 
 void RiverCrossing::solve(const char *fileName)
 {
-    // int iterations = 0;
+    int iterations = 0;
     // leer el archivo, pasando las direcciones donde se almacenan las variables relevantes para el problema
     if (!getProblemInfo(fileName))
         return;
     // Estado [0, 0, 0, ..., 0]
-    State *currentState = new State(this->totalItemCount);
+    State *currentState = new State(0);
     // for (int i = 0; i < this->operationTotal; i++)
     // {
     //     cout << this->operationHeap[i]->result << " ";
@@ -215,9 +216,9 @@ void RiverCrossing::solve(const char *fileName)
     while (!this->openAVL->isEmpty()) 
     {
         State *s = this->openAVL->pop();
-        // cout << "iterations->" << iterations << endl;
-        // cout << "Open->" << s->rightSide << endl;
-        // cout << "Side->" << (int)s->currentBoatSide << endl;
+        cout << "iterations->" << iterations << endl;
+        cout << "Open->" << s->rightSide << endl;
+        cout << "Side->" << (int)s->currentBoatSide << endl;
         if (isFinalState(s)) 
         {
             cout << "Solución encontrada:" << endl;
@@ -232,17 +233,19 @@ void RiverCrossing::solve(const char *fileName)
                 break;
             if (canMove(s, this->operationHeap[i]->result))
             {
-                // cout << "probando operacion:"  << this->operationHeap[i]->result << endl;
+                cout << "probando operacion:"  << this->operationHeap[i]->result << endl;
                 State *s1 = s->boatMove(this->operationHeap[i]->result);
-                // cout << "operacion realizada: " << bitset<32>(s1->rightSide) << endl;
-                if (!closedAVL->searchValue(s1->rightSide) && !this->openAVL->searchValue(s1->rightSide))
+                cout << "operacion realizada: " << bitset<32>(s1->rightSide) << endl;
+                if (!closedAVL->search(s1->rightSide) && !this->openAVL->search(s1->rightSide))
                 {
+                    cout << "sear" << endl;
                     this->openAVL->insert(s1);
+                    cout << "inse" << endl;
                 }
             }
         }
         // cout << endl;
-        // iterations++;
+        iterations++;
     }
     cout << "No hay solución" << endl;
 }

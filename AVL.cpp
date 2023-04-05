@@ -1,166 +1,167 @@
 #include "Node.h"
 #include "AVL.h"
 #include <iostream>
-
 using namespace std;
 
-
-Node* AVL::right_rotation(Node* p)
-{
-    Node* new_p = p->left_node_;
-    p->left_node_ = new_p->right_node_;
-    new_p->right_node_ = p;
-
-    p->height_ = max(sub_tree_height(p->left_node_), sub_tree_height(p->right_node_));
-    new_p->height_ = max(sub_tree_height(new_p->left_node_), sub_tree_height(new_p->right_node_));
-
-    return new_p;
+// Obtener la altura de un nodo
+int AVL::height(Node* node) {
+    if (node == nullptr) {
+        return 0;
+    } else {
+        return node->height;
+    }
 }
 
-Node* AVL::left_rotation(Node* p)
-{
-    Node* new_p = p->right_node_;
-    p->right_node_ = new_p->left_node_;
-    new_p->left_node_ = p;
-
-    p->height_ = max(sub_tree_height(p->left_node_), sub_tree_height(p->right_node_));
-    new_p->height_ = max(sub_tree_height(new_p->left_node_), sub_tree_height(new_p->right_node_));
-
-    return new_p;
+// Obtener el factor de equilibrio de un nodo
+int AVL::balanceFactor(Node* node) {
+    if (node == nullptr) {
+        return 0;
+    } else {
+        return height(node->left) - height(node->right);
+    }
 }
 
-Node* AVL::maximum_node_of_tree(Node* node)
-{
-    if(node->right_node_ == nullptr) return node;
-    else return maximum_node_of_tree(node->right_node_);
+// Rotación simple a la izquierda
+Node* AVL::rotateLeft(Node* node) {
+    Node* newRoot = node->right;
+    node->right = newRoot->left;
+    newRoot->left = node;
+
+    node->height = 1 + max(height(node->left), height(node->right));
+    newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
+
+    return newRoot;
 }
 
-unsigned int AVL::sub_tree_height(Node* node)
-{
-    return (node != nullptr)?node->height_ + 1:0;
+// Rotación simple a la derecha
+Node* AVL::rotateRight(Node* node) {
+    Node* newRoot = node->left;
+    node->left = newRoot->right;
+    newRoot->right = node;
+
+    node->height = 1 + max(height(node->left), height(node->right));
+    newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
+
+    return newRoot;
 }
 
-Node* AVL::insert_(State *key, Node* node)
-{
-    if(node == nullptr)
-    {
-        return node = new Node(key);
-    }
-
-    if(key->rightSide < node->key_->rightSide) 
-    {
-        node->left_node_ = insert_(key, node->left_node_);
-    }
-    else if(key->rightSide > node->key_->rightSide) 
-    {
-        node->right_node_ = insert_(key, node->right_node_);
-    }
-    else if(node->key_->rightSide == key->rightSide) return node;
-
-    int height_L = sub_tree_height(node->left_node_);
-    int height_R = sub_tree_height(node->right_node_);
-
-    node->height_ = max(height_L, height_R);
-    
-    int balance_factor = height_L - height_R;
-
-    if(balance_factor > 1)//L
-    {
-        if(key->rightSide < node->left_node_->key_->rightSide)//L
-        {
-            return node = right_rotation(node);
-        }
-        else//R
-        {
-            node->left_node_ = left_rotation(node->left_node_);
-            return node = right_rotation(node);
-        }
-    }
-    else if(balance_factor < -1)//R
-    {
-        if(key->rightSide < node->right_node_->key_->rightSide)//L
-        {
-            node->right_node_ = right_rotation(node->right_node_);
-            return node = left_rotation(node);
-        }
-        else//R
-        {
-            return node = left_rotation(node);
-        }
-    }
-
-    return node;
+// Rotación doble a la izquierda
+Node* AVL::rotateLeftRight(Node* node) {
+    node->left = rotateLeft(node->left);
+    return rotateRight(node);
 }
 
-Node* AVL::pop_(unsigned int key, Node* node)
+// Rotación doble a la derecha
+Node* AVL::rotateRightLeft(Node* node) {
+    node->right = rotateRight(node->right);
+    return rotateLeft(node);
+}
+
+// Insertar un nodo en el árbol AVL
+Node* AVL::insertNode(Node* node, State *value) {
+    if (node == nullptr) {
+        return new Node(value);
+    } else if (value->rightSide < node->value->rightSide) {
+        node->left = insertNode(node->left, value);
+    } else if (value->rightSide > node->value->rightSide) {
+        node->right = insertNode(node->right, value);
+    } else {
+        return node; // No se permiten valores duplicados
+    }
+
+    // Actualizar la altura del nodo
+    node->height = 1 + max(height(node->left), height(node->right));
+
+    // Verificar el balance del árbol
+    int bf = balanceFactor(node);
+    if (bf > 1 && value->rightSide < node->left->value->rightSide) { // Rotación simple a la derecha
+        return rotateRight(node);
+    } else if (bf > 1 && value->rightSide > node->left->value->rightSide) { // Rotación doble a la derecha
+        return rotateLeftRight(node);
+    } else if (bf < -1 && value->rightSide > node->right->value->rightSide) { // Rotación simple a la izquierda
+        return rotateLeft(node);
+    } else if (bf < -1 && value->rightSide < node->right->value->rightSide) { // Rotación doble a la izquierda
+        return rotateRightLeft(node);
+    }
+return node;
+}
+
+// Obtener el nodo con el valor mínimo en un subárbol
+Node* AVL::getMinNode(Node* node)
 {
-    if(node == nullptr) return nullptr;
-
-    if(key < node->key_->rightSide) 
+    Node* current = node;
+    while (current->left != nullptr)
     {
-        node->left_node_ = pop_(key, node->left_node_);
+        current = current->left;
     }
-    else if(key > node->key_->rightSide) 
+    return current;
+}
+// Obtener el nodo con el valor máximo en un subárbol
+Node* AVL::getMaxNode(Node* node)
+{
+    Node* current = node;
+    while (current->right != nullptr)
     {
-        node->right_node_ = pop_(key, node->right_node_);
+        current = current->right;
     }
-    else //if(node->key_ == key) 
+    return current;
+}
+
+// Eliminar un nodo en el árbol AVL
+Node* AVL::deleteNode(Node* node, int value)
+{
+    if (node == nullptr)
     {
-        if(node->left_node_ == nullptr && node->right_node_ == nullptr)
-        {
-            delete node;
-            return nullptr;
-        }
-        else if(node->left_node_ == nullptr && node->right_node_ != nullptr)
-        {
-            Node* sub_right_tree = node->right_node_;
-            delete node;
-            return sub_right_tree;
-        }
-        else if(node->left_node_ != nullptr && node->right_node_ == nullptr)
-        {
-            Node* sub_left_tree = node->left_node_;
-            delete node;
-            return sub_left_tree;
-        }
-        else            
-        {
-            Node* maxium_node_in_sub_left_tree = maximum_node_of_tree(node->left_node_);
-            node->key_ = maxium_node_in_sub_left_tree->key_;
-            node->left_node_ = pop_(maxium_node_in_sub_left_tree->key_->rightSide, node->left_node_);
-        }
-    }
-
-    unsigned int height_L = sub_tree_height(node->left_node_);
-    unsigned int height_R = sub_tree_height(node->right_node_);
-
-    node->height_ = max(height_L, height_R);
-    
-    unsigned int balance_factor = height_L - height_R;
-
-    if(balance_factor > 1)//L
+        return node;
+    } 
+    else if (value < node->value->rightSide)
     {
-        if(sub_tree_height(node->left_node_->left_node_) > sub_tree_height(node->left_node_->right_node_))//L
-        {
-            return node = right_rotation(node);
-        }
-        else//R
-        {
-            node->left_node_ = left_rotation(node->left_node_);
-            return node = right_rotation(node);
+        node->left = deleteNode(node->left, value);
+    } 
+    else if (value > node->value->rightSide)
+    {
+        node->right = deleteNode(node->right, value);
+    } 
+    else
+    {
+        if (node->left == nullptr || node->right == nullptr)
+        { // Caso 1: el nodo tiene 0 o 1 hijo
+            Node* temp = node->left ? node->left : node->right;
+            if (temp == nullptr) { // Caso 1a: el nodo no tiene hijos
+                temp = node;
+                node = nullptr;
+            } else { // Caso 1b: el nodo tiene 1 hijo
+                *node = *temp;
+            }
+            delete temp;
+        } 
+        else
+        { // Caso 2: el nodo tiene 2 hijos
+            Node* temp = getMinNode(node->right);
+            node->value = temp->value;
+            node->right = deleteNode(node->right, temp->value->rightSide);
         }
     }
-    else if(balance_factor < -1)//R
+
+    // Si el árbol está vacío después de eliminar el nodo, retornar nullptr
+    if (node == nullptr)
     {
-        if(sub_tree_height(node->right_node_->left_node_) > sub_tree_height(node->right_node_->right_node_))//L
-        {
-            node->right_node_ = right_rotation(node->right_node_);
-            return node = left_rotation(node);
-        }
-        else//R
-        {
-            return node = left_rotation(node);
-        }
+        return node;
+    }
+
+    // Actualizar la altura del nodo
+    node->height = 1 + max(height(node->left), height(node->right));
+
+    // Verificar el balance del árbol
+    int bf = balanceFactor(node);
+    if (bf > 1 && balanceFactor(node->left) >= 0) { // Rotación simple a la derecha
+        return rotateRight(node);
+    } else if (bf > 1 && balanceFactor(node->left) < 0) { // Rotación doble a la derecha
+        return rotateLeftRight(node);
+    } else if (bf < -1 && balanceFactor(node->right) <= 0) { // Rotación simple a la izquierda
+        return rotateLeft(node);
+    } else if (bf < -1 && balanceFactor(node->right) > 0) { // Rotación doble a la izquierda
+        return rotateRightLeft(node);
     }
 
     return node;
@@ -168,54 +169,43 @@ Node* AVL::pop_(unsigned int key, Node* node)
 
 AVL::AVL()
 {
-    this->root_ = nullptr;
+root = nullptr;
+}
+// Insertar un valor en el árbol AVL
+void AVL::insert(State *value) {
+    this->root = insertNode(root, value);
 }
 
-AVL::~AVL()
-{
-
+// Eliminar un valor del árbol AVL
+void AVL::remove(int value) {
+    this->root = deleteNode(this->root, value);
 }
 
-void AVL::insert(State *key)
-{
-    this->root_ = insert_(key, this->root_);
-}
-
-void AVL::deleteState(unsigned int key)
-{
-    this->root_ = pop_(key, this->root_);
+// Buscar un valor en el árbol AVL
+bool AVL::search(int value) {
+    Node* current = root;
+    while (current != nullptr) {
+        if (current->value->rightSide == value) {
+            return true;
+        } else if (value < current->value->rightSide) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+    return false;
 }
 
 State *AVL::pop()
 {
-    State *maxState = maximum_node_of_tree(this->root_)->key_;
-    unsigned int max = maxState->rightSide;
-    this->deleteState(max);
-    return maxState;
+    State *max = getMaxNode(this->root)->value;
+    this->remove(max->rightSide);
+    return max;
 }
-
-bool AVL::search(Node *n, unsigned int value)
-{
-    if (n == nullptr)
-        return false;
-    unsigned int nodeVal = n->key_->rightSide;
-    if (nodeVal == value)
-        return true;
-    if (nodeVal > value)
-        return search(n->left_node_, value);
-    if (nodeVal < value)
-        return search(n->right_node_, value);
-    return false;
-}
-
-bool AVL::searchValue(unsigned int value)
-{
-    return this->search(this->root_, value);
-}
-
 bool AVL::isEmpty()
 {
-    if (this->root_ == nullptr)
-        return true;
-    return false;
+    if (this->root == nullptr)
+        return false;
+    return true;
 }
+

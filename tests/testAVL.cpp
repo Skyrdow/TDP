@@ -3,22 +3,20 @@
 
 using namespace std;
 
+
+// Ejemplo de uso
 int main()
 {
-    AVL *avltree = new AVL();
-
-    avltree->insert(new State(1));
-    avltree->insert(new State(2));
-    avltree->insert(new State(3));
-    avltree->insert(new State(4));
-    avltree->insert(new State(5));
-    avltree->insert(new State(6));
-    avltree->insert(new State(7));
-
-    cout << avltree->pop()->rightSide << endl;
-    // cout << avltree->pop() << endl;
-    // cout << avltree->pop() << endl;
-    // cout << avltree->pop() << endl;
-  
+    AVL *tree = new AVL();
+    tree->insert(new State(10));
+    tree->insert(new State(20));
+    tree->insert(new State(30));
+    tree->insert(new State(40));
+    tree->insert(new State(50));
+    tree->insert(new State(25));
+    cout << "Árbol AVL en orden ascendente: "<<
+    tree->search(10);
+    tree->remove(30);
+    cout << "Árbol AVL en orden ascendente después de eliminar 30: ";
     return 0;
 }

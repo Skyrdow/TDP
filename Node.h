@@ -1,14 +1,12 @@
 #pragma once
 #include "State.h"
-class Node
-{
-private:
+// Nodo AVL
+class Node {
 public:
-    State *key_;
-    int height_;
+    State *value;
+    int height;
+    Node* left;
+    Node* right;
 
-    Node* left_node_;
-    Node* right_node_;
-    Node(State *key, Node* left_node=nullptr, Node* right_node=nullptr);
-    ~Node();
+    Node(State *value);
 };
