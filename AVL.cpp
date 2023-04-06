@@ -23,26 +23,32 @@ int AVL::balanceFactor(Node* node) {
 
 // Rotación simple a la izquierda
 Node* AVL::rotateLeft(Node* node) {
-    Node* newRoot = node->right;
-    node->right = newRoot->left;
-    newRoot->left = node;
+    Node* temp = node->right;
+    if (temp == nullptr) {
+        return node;
+    }
+    node->right = temp->left;
+    temp->left = node;
 
     node->height = 1 + max(height(node->left), height(node->right));
-    newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
+    temp->height = 1 + max(height(temp->left), height(temp->right));
 
-    return newRoot;
+    return temp;
 }
 
 // Rotación simple a la derecha
 Node* AVL::rotateRight(Node* node) {
-    Node* newRoot = node->left;
-    node->left = newRoot->right;
-    newRoot->right = node;
+    Node* temp = node->left;
+    if (temp == nullptr) {
+        return node;
+    }
+    node->left = temp->right;
+    temp->right = node;
 
     node->height = 1 + max(height(node->left), height(node->right));
-    newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
+    temp->height = 1 + max(height(temp->left), height(temp->right));
 
-    return newRoot;
+    return temp;
 }
 
 // Rotación doble a la izquierda
@@ -169,21 +175,42 @@ Node* AVL::deleteNode(Node* node, int value)
 
 AVL::AVL()
 {
-root = nullptr;
+    rootLeft = nullptr;
+    rootRight = nullptr;
 }
 // Insertar un valor en el árbol AVL
 void AVL::insert(State *value) {
-    this->root = insertNode(root, value);
+    if (value->currentBoatSide == State::boatSide::left)
+    {
+        this->rootLeft = insertNode(this->rootLeft, value);
+    }
+    if (value->currentBoatSide == State::boatSide::right)
+    {
+        this->rootRight = insertNode(this->rootRight, value);
+    }
+    
 }
 
 // Eliminar un valor del árbol AVL
-void AVL::remove(int value) {
-    this->root = deleteNode(this->root, value);
+void AVL::remove(State *value) {
+    if (value->currentBoatSide == State::boatSide::left)
+    {
+        this->rootLeft = deleteNode(this->rootLeft, value->rightSide);
+    }
+    if (value->currentBoatSide == State::boatSide::right)
+    {
+        this->rootRight = deleteNode(this->rootRight, value->rightSide);
+    }
 }
 
 // Buscar un valor en el árbol AVL
-bool AVL::search(int value) {
-    Node* current = root;
+bool AVL::_search(int value, bool left) {
+    Node *current;
+    if (left)
+        current = this->rootLeft;
+    else
+        current = this->rootRight;
+
     while (current != nullptr) {
         if (current->value->rightSide == value) {
             return true;
@@ -195,16 +222,104 @@ bool AVL::search(int value) {
     }
     return false;
 }
+bool AVL::search(State *value) {
+    if (value->currentBoatSide == State::boatSide::left)
+        return _search(value->rightSide, 1);
+    else if (value->currentBoatSide == State::boatSide::right)
+        return _search(value->rightSide, 0);
+    return false;
+}
 
-State *AVL::pop()
+State *AVL::pop(State::boatSide boatSide)
 {
-    State *max = getMaxNode(this->root)->value;
-    this->remove(max->rightSide);
-    return max;
+    if (boatSide == State::boatSide::left)
+    {
+        State *res = pop_(this->rootLeft);
+        if (res == nullptr)
+            return pop_(this->rootRight);
+        return res;
+    }
+    if (boatSide == State::boatSide::right)
+    {
+        State *res = pop_(this->rootRight);
+        if (res == nullptr)
+            return pop_(this->rootLeft);
+        return res;
+    }
+    return nullptr;
+}
+// Función principal para remover el nodo con el valor máximo del AVL
+State *AVL::pop_(Node*& root) {
+    if (root == nullptr)
+        return nullptr;
+
+    // Si el nodo actual es el máximo, lo eliminamos y devolvemos su valor
+    if (root->right == nullptr) {
+        State *value = root->value;
+        Node* temp = root;
+        root = root->left;
+        delete temp;
+        return value;
+    }
+
+    // De lo contrario, seguimos buscando el máximo en el subárbol derecho
+    Node* parent = nullptr;
+    Node* current = root;
+
+    while (current->right != nullptr) {
+        parent = current;
+        current = current->right;
+    }
+
+    State *value = current->value;
+
+    // Si el nodo a remover tiene un subárbol izquierdo, lo reemplazamos por este
+    if (current->left != nullptr) {
+        parent->right = current->left;
+    } else {
+        parent->right = nullptr;
+    }
+
+    // Balanceamos el árbol después de remover el nodo
+    root = balance(root);
+
+    // Liberamos la memoria del nodo removido
+    delete current;
+
+    return value;
+}
+// Función auxiliar para balancear el AVL después de remover un nodo
+Node* AVL::balance(Node* root) {
+    if (root == nullptr)
+        return root;
+
+    int bFactor = balanceFactor(root);
+
+    // Rotación simple a la izquierda
+    if (bFactor > 1 && balanceFactor(root->left) >= 0)
+        return rotateRight(root);
+
+    // Rotación doble a la izquierda
+    if (bFactor > 1 && balanceFactor(root->left) < 0) {
+        root->left = rotateLeft(root->left);
+        return rotateRight(root);
+    }
+
+    // Rotación simple a la derecha
+    if (bFactor < -1 && balanceFactor(root->right) <= 0)
+        return rotateLeft(root);
+
+    // Rotación doble a la derecha
+    if (bFactor < -1 && balanceFactor(root->right) > 0) {
+        root->right = rotateRight(root->right);
+        return rotateLeft(root);
+    }
+
+    return root;
 }
 bool AVL::isEmpty()
 {
-    if (this->root == nullptr)
+    if (this->rootLeft == nullptr && this->rootRight == nullptr)
         return true;
     return false;
 }

@@ -1,68 +1,53 @@
-#include "RiverCrossing.h"
-#include "FileReader.h"
 #include <iostream>
 #include <bitset>
+#include <vector>
+#include "RiverCrossing.h"
+#include "FileReader.h"
 
 using namespace std;
 
-// https://www.geeksforgeeks.org/cpp-program-for-quicksort/
-
-unsigned int RiverCrossing::partition(Operation *arr[], unsigned int start, unsigned int end)
-{
-
-	Operation *pivot = arr[start];
-
-	unsigned int count = 0;
-	for (unsigned int i = start + 1; i <= end; i++) {
-		if (arr[i]->rightSideCount <= pivot->rightSideCount)
-			count++;
-	}
-
-	// Giving pivot element its correct position
-	unsigned int pivotIndex = start + count;
-	swap(arr[pivotIndex], arr[start]);
-
-	// Sorting left and right parts of the pivot element
-	unsigned int i = start, j = end;
-
-	while (i < pivotIndex && j > pivotIndex) {
-
-		while (arr[i]->rightSideCount <= pivot->rightSideCount) {
-			i++;
-		}
-
-		while (arr[j]->rightSideCount > pivot->rightSideCount) {
-			j--;
-		}
-
-		if (i < pivotIndex && j > pivotIndex) {
-			swap(arr[i++], arr[j--]);
-		}
-	}
-
-	return pivotIndex;
+void RiverCrossing::printBits(unsigned int n) {
+    char* p = (char*)&n;
+    for (int i = 3; i >= 0; i--) {
+        for (int j = 7; j >= 0; j--) {
+            cout << ((*(p + i) >> j) & 1);
+        }
+    }
+    cout << endl;
 }
 
-void RiverCrossing::quickSort(Operation *arr[], unsigned int start, unsigned int end)
-{
+void RiverCrossing::quicksort(std::vector<Operation *>arr, int left, int right) {
+  int i = left, j = right;
+  int pivot = arr[(left + right) / 2]->rightSideCount;
 
-	// base case
-	if (start >= end)
-		return;
+  while (i <= j) {
+    while (arr[i]->rightSideCount < pivot) {
+      i++;
+    }
 
-	// partitioning the array
-	unsigned int p = partition(arr, start, end);
+    while (arr[j]->rightSideCount > pivot) {
+      j--;
+    }
 
-	// Sorting the left part
-	quickSort(arr, start, p - 1);
+    if (i <= j) {
+      swap(arr[i], arr[j]);
+      i++;
+      j--;
+    }
+  }
 
-	// Sorting the right part
-	quickSort(arr, p + 1, end);
+  if (left < j) {
+    quicksort(arr, left, j);
+  }
+
+  if (i < right) {
+    quicksort(arr, i, right);
+  }
 }
 
 void RiverCrossing::sortOperations()
 {
-    quickSort(this->operationHeap, 0, this->operationTotal-1);
+    quicksort(this->operationHeap, 0, this->operationHeap.size()-1);
 }
 
 RiverCrossing::RiverCrossing()
@@ -85,16 +70,14 @@ void RiverCrossing::printInfo()
     cout<<"Restricciones Izq:"<<endl;
     for(int i = 0; i < this->leftRestrictionCount; i++)
     {
-        std::bitset<MAX_BITSIZE> A = this->leftRestrictionMatrix[i]; 
-        cout << A << endl;
+        printBits(this->leftRestrictionMatrix[i]);
     }
     cout << endl;
 
     cout<<"Restricciones Der:"<<endl;
     for(int i = 0; i < this->rightRestrictionCount; i++)
     {
-        std::bitset<MAX_BITSIZE> A = this->rightRestrictionMatrix[i];
-        cout << A << endl;
+        printBits(this->rightRestrictionMatrix[i]);
     }
     cout << endl;
 }
@@ -106,44 +89,56 @@ bool RiverCrossing::isFinalState(State *checkState)
     return false;
 }
 
-bool RiverCrossing::isValidState(unsigned int checkState)
+bool RiverCrossing::isValidOperation(unsigned int checkState)
 {
-    for (int i = 0; i < this->leftRestrictionCount; i++)
-    {
-        if (checkState == this->leftRestrictionMatrix[i])
-            return false;
-    }
-    for (int i = 0; i < this->rightRestrictionCount; i++)
-    {
-        if (checkState == this->rightRestrictionMatrix[i])
-            return false;
-    }
+    // revisar conductor, debe haber al menos 1
+    if ((this->driverCheck & checkState) == 0)
+        return false;
+
+    // revisar bote
+    if (__builtin_popcount(checkState) > this->boatSize)
+        return false;
+
     return true;
 }
 
 bool RiverCrossing::canMove(State *checkState, unsigned int move)
 {
-    // revisar conductor, debe haber al menos 1
-    if ((this->driverCheck & move) == 0)
-        return false;
-
-    // revisar bote
-    if (bitset<MAX_BITSIZE>(move).count() > this->boatSize)
-        return false;
-
+    unsigned int leftSide = ~checkState->rightSide & this->finalStateValue; 
+    unsigned int movedStateLeft;
+    unsigned int movedStateRight;
     if (checkState->currentBoatSide == State::boatSide::right)
     {
-        if ((checkState->rightSide & move) == move)
-            return true;
+        if ((checkState->rightSide & move) != move){
+            // cout << "No están los elementos der" << endl;
+            // cout << bitset<MAX_BITSIZE>(checkState->rightSide) << "|"<< bitset<MAX_BITSIZE>(move) << endl;
+            return false;}
+        movedStateRight = checkState->rightSide & ~move;
+        movedStateLeft = ~(checkState->rightSide & ~move) & this->finalStateValue;
     }
     if (checkState->currentBoatSide == State::boatSide::left)
     {
-        if ((~(checkState->rightSide) & move) == move)
-            return true;
+        if ((leftSide & move) != move){
+            // cout << "No están los elementos izq" << endl;
+            return false;}
+        movedStateLeft = leftSide & ~move;
+        movedStateRight = ~(leftSide & ~move) & this->finalStateValue;
     }
     
-    return false;
+    for (int i = 0; i < this->leftRestrictionCount; i++)
+    {
+        if (movedStateLeft == this->leftRestrictionMatrix[i]){
+            // cout << "Restricción" << endl;
+            return false;}
+    }
 
+    for (int i = 0; i < this->rightRestrictionCount; i++)
+    {
+        if (movedStateRight == this->rightRestrictionMatrix[i]){
+            // cout << "Restricción" << endl;
+            return false;}
+    }
+    return true;
 }
 
 bool RiverCrossing::getProblemInfo(const char *fileName)
@@ -160,18 +155,19 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
         
         this->finalStateValue = (1 << this->totalItemCount) - 1;
         
-        // bitset<MAX_BITSIZE> bitFinalState(this->finalStateValue);
-        // cout << "Condición final: \n" << bitFinalState << endl << endl;
+        cout << "Condición final: \n";
+        printBits(this->finalStateValue);
+        cout << endl;
         
         this->driverCheck = (1 << this->driverCount) - 1;
 
         this->leftRestrictionCount = fr->readRestrictionSize();
         this->leftRestrictionMatrix = new unsigned int[this->leftRestrictionCount];
-        fr->fillLeftMatrix(this->leftRestrictionMatrix, this->leftRestrictionCount);
+        fr->fillRestrMatrix(this->leftRestrictionMatrix, this->leftRestrictionCount);
 
         rightRestrictionCount = fr->readRestrictionSize();
         this->rightRestrictionMatrix = new unsigned int[this->rightRestrictionCount];
-        fr->fillRightMatrix(this->rightRestrictionMatrix, this->rightRestrictionCount);
+        fr->fillRestrMatrix(this->rightRestrictionMatrix, this->rightRestrictionCount);
         
         genOperations();
         
@@ -185,15 +181,15 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
 
 void RiverCrossing::genOperations()
 {
-    this->operationTotal = (1 << this->totalItemCount);
-    this->operationHeap = new Operation*[operationTotal];
+    unsigned int operationTotal = (1 << this->totalItemCount);
     for (unsigned int i = 0; i < operationTotal; i++)
     {
-        Operation *op = new Operation();
-        this->operationHeap[i] = op;
-        if (!isValidState(i))
+        if (!isValidOperation(i))
             continue;
-        op->rightSideCount = bitset<MAX_BITSIZE>(i).count();
+        Operation *op = new Operation();
+        this->operationHeap.push_back(op);
+        // contar los 1s que tiene el número
+        op->rightSideCount = __builtin_popcount(i);
         op->result = i;
     }
     sortOperations();
@@ -206,18 +202,24 @@ void RiverCrossing::solve(const char *fileName)
     if (!getProblemInfo(fileName))
         return;
     // Estado [0, 0, 0, ..., 0]
-    State *currentState = new State(0);
-    // for (int i = 0; i < this->operationTotal; i++)
+    State *currentState = new State(0, this->finalStateValue);
+    // for (int i = 0; i < operationIndex; i++)
     // {
-    //     cout << this->operationHeap[i]->result << " ";
+    //     cout << operationHeap[i]->result << " ";
     // }
     // cout << endl;
+    
+    State::boatSide side = State::boatSide::right;
     this->openAVL->insert(currentState);
     while (!this->openAVL->isEmpty()) 
     {
-        State *s = this->openAVL->pop();
-        // cout << "iterations->" << iterations << endl;
-        // cout << "Open->" << s->rightSide << endl;
+        if (side == State::boatSide::left)
+            side = State::boatSide::right;
+        else
+            side = State::boatSide::left;
+
+        State *s = this->openAVL->pop(side);
+        // cout << "Open->" << bitset<32>(s->rightSide).to_string() << endl;
         // cout << "Side->" << (int)s->currentBoatSide << endl;
         if (isFinalState(s)) 
         {
@@ -227,25 +229,24 @@ void RiverCrossing::solve(const char *fileName)
         }
         closedAVL->insert(s);
         // recorrer el arreglo de ops desde el final
-        for (unsigned int i = this->operationTotal - 1; 0 <= i; i--)
+        for (int i = this->operationHeap.size()-1; 0 <= i; i--)
         {
-            if (this->operationHeap[i]->result == 0)
-                break;
+            // cout << "probando operacion:"  << bitset<32>(this->operationHeap[i]->result) << endl;
             if (canMove(s, this->operationHeap[i]->result))
             {
-                // cout << "probando operacion:"  << this->operationHeap[i]->result << endl;
                 State *s1 = s->boatMove(this->operationHeap[i]->result);
-                // cout << "operacion realizada: " << bitset<32>(s1->rightSide) << endl;
-                if (!closedAVL->search(s1->rightSide) && !this->openAVL->search(s1->rightSide))
+                // cout << "operacion realizada-----: " << bitset<32>(s1->rightSide) << endl;
+                if (!closedAVL->search(s1) && !this->openAVL->search(s1))
                 {
-                    // cout << "sear" << endl;
                     this->openAVL->insert(s1);
-                    // cout << "inse" << endl;
                 }
+                // else
+                    // cout << "ya está en los aVL"<< endl;
             }
         }
         // cout << endl;
         // iterations++;
     }
     cout << "No hay solución" << endl;
+    // delete this->operationHeap._Destroy;
 }

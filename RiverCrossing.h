@@ -2,13 +2,13 @@
 #include "State.h"
 #include "Operation.h"
 #include "AVL.h"
+#include <vector>
 class RiverCrossing
 {
 private:
-    unsigned int partition(Operation *arr[], unsigned int start, unsigned int end);
-    void quickSort(Operation *arr[], unsigned int start, unsigned int end);
+    void quicksort(std::vector<Operation *>arr, int start, int end);
+    void printBits(unsigned int n);
 
-public:
     int driverCount;
     int itemCount;
     int totalItemCount;
@@ -24,20 +24,20 @@ public:
     AVL *openAVL;
     AVL *closedAVL;
 
-    Operation **operationHeap;
-    unsigned int operationTotal;
+    std::vector<Operation *> operationHeap;
+    unsigned int operationIndex;
 
-    RiverCrossing();
-    ~RiverCrossing();
-
-    void solve(const char *fileName);
     bool isFinalState(State *checkState);
-    bool isValidState(unsigned int checkState);
+    bool isValidOperation(unsigned int checkState);
     bool canMove(State *checkState, unsigned int move);
     
-
     void sortOperations();
     void printInfo();
     bool getProblemInfo(const char *fileName);
     void genOperations();
+public:
+    RiverCrossing();
+    ~RiverCrossing();
+
+    void solve(const char *fileName);
 };

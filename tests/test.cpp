@@ -5,6 +5,8 @@
 
 using namespace std;
 
+
+
 int main() {
     clock_t t_ini, t_fin;
     double secs=0;

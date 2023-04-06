@@ -6,11 +6,13 @@ State::~State()
 {
 
 }
+
 /// @brief Constructor de State, distintas versiones aplican valores por defecto
 /// @param right numero entero sin signo que representa todos los objetos
 /// @param stateSize tamaño del State
-State::State(int right)
+State::State(int right, unsigned int finalStateValue)
 {
+    this->finalStateValue = finalStateValue;
     this->currentBoatSide = boatSide::left; 
     this->rightSide = right;
     this->previousState = nullptr;
@@ -20,11 +22,21 @@ State::State(int right)
 /// @param right numero entero sin signo que representa todos los objetos
 /// @param stateSize tamaño del State
 /// @param newBoatSide lado en el que se encuentra el bote
-State::State(int right, boatSide newBoatSide)
+State::State(int right, unsigned int finalStateValue, boatSide newBoatSide)
 {
+    this->finalStateValue = finalStateValue;
     this->currentBoatSide = newBoatSide;
     this->rightSide = right;
     this->previousState = nullptr;
+}
+
+void State::printBits(unsigned int n) {
+    char* p = (char*)&n;
+    for (int i = 3; i >= 0; i--) {
+        for (int j = 7; j >= 0; j--) {
+            std::cout << ((*(p + i) >> j) & 1);
+        }
+    }
 }
 
 /// @brief Muestra por consola el State actual
@@ -33,7 +45,10 @@ void State::print()
     // A will hold the binary representation of N 
     if (this->previousState != nullptr)
         this->previousState->print();
-    std::cout << std::bitset<MAX_BITSIZE>(this->rightSide) << std::endl;
+    printBits(~this->rightSide & this->finalStateValue);
+    std::cout << "|";
+    printBits(this->rightSide);
+    std::cout << std::endl;
 }
 
 /// @brief Copia los valores del State
@@ -42,6 +57,7 @@ State *State::copy()
 {
     return new State(
         this->rightSide, 
+        this->finalStateValue,
         this->currentBoatSide);
 }
 
@@ -61,16 +77,16 @@ void State::swapBoatSide()
 State *State::boatMove(int moving)
 {
     State *newState = this->copy();
-    if (this->currentBoatSide == boatSide::right)
+    unsigned int leftSide = ~this->rightSide & this->finalStateValue;
+    unsigned int movedState;
+    if (this->currentBoatSide == State::boatSide::right)
     {
-        moving = ~moving;
-        newState->rightSide = newState->rightSide & moving;
+        newState->rightSide = this->rightSide & ~moving;
     }
-    else
+    if (this->currentBoatSide == State::boatSide::left)
     {
-        newState->rightSide = newState->rightSide | moving;
+        newState->rightSide = ~(leftSide & ~moving) & this->finalStateValue;
     }
-
     newState->swapBoatSide();
     newState->previousState = this;
     return newState;

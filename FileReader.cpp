@@ -71,7 +71,7 @@ int FileReader::readRestrictionSize()
 /// @brief Rellena la matriz izquierda de restricciones
 /// @param restrMatrix matriz con memoria ya asignada, esta se modifica
 /// @param restrCount cantidad de restricciones
-void FileReader::fillLeftMatrix(unsigned int *restrMatrix, int restrCount)
+void FileReader::fillRestrMatrix(unsigned int *restrMatrix, int restrCount)
 {
     string line;
     stringstream ss;
@@ -89,29 +89,5 @@ void FileReader::fillLeftMatrix(unsigned int *restrMatrix, int restrCount)
             restrMatrix[i] += 1 << pow;
         }
         // https://stackoverflow.com/questions/40169322/c-how-to-flip-the-binary-values-of-each-bit-in-int
-        restrMatrix[i] = ~restrMatrix[i];
-    }
-}
-
-/// @brief Rellena la matriz izquierda de restricciones
-/// @param restrMatrix matriz con memoria ya asignada, esta se modifica
-/// @param restrCount cantidad de restricciones
-void FileReader::fillRightMatrix(unsigned int *restrMatrix, int restrCount)
-{
-    string line;
-    stringstream ss;
-    for (int i = 0; i < restrCount; i++) 
-    {
-        restrMatrix[i] = 0; // asegurar que no exista basura en el puntero
-        int pow = 0;
-        getline(*this->inputFile, line);
-        ss.clear(); // limpiar el stream de caracteres
-        ss << line; // copiar la linea al stream
-        int a;
-        while (ss >> a) // https://comp.lang.cpp.moderated.narkive.com/vwstw4Un/std-stringstream-and-eof-strangeness
-        { 
-            pow = a-1;
-            restrMatrix[i] += 1 << pow;
-        }
     }
 }

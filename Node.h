@@ -4,6 +4,8 @@
 class Node {
 public:
     State *value;
+    bool boatLeft;
+    bool boatRight;
     int height;
     Node* left;
     Node* right;

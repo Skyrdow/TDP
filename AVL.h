@@ -5,7 +5,8 @@
 // Clase AVL
 class AVL {
 private:
-    Node* root;
+    Node* rootLeft;
+    Node* rootRight;
     int height(Node* node);
     int balanceFactor(Node* node);
     Node* rotateLeft(Node* node);
@@ -19,10 +20,13 @@ private:
 public:
     AVL();
     void insert(State *value);
-    void remove(int value);
-    bool search(int value);
+    void remove(State *value);
+    bool search(State *value);
+    bool _search(int value, bool left);
     bool isEmpty();
-    State *pop();
+    State *pop(State::boatSide boatSide);
+    State *pop_(Node*& node);
+    Node *balance(Node *root);
 };
 
 
