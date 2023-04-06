@@ -19,6 +19,9 @@ private:
     Node* deleteNode(Node* node, int value);
 public:
     AVL();
+    ~AVL();
+    void printInorder();
+    void printInorder(Node* node);
     void insert(State *value);
     void remove(State *value);
     bool search(State *value);

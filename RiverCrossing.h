@@ -30,7 +30,10 @@ private:
     bool isFinalState(State *checkState);
     bool isValidOperation(unsigned int checkState);
     bool canMove(State *checkState, unsigned int move);
-    
+
+    void printFinalState(State *final);
+    void processState(State *state, unsigned int move);
+
     void sortOperations();
     void printInfo();
     bool getProblemInfo(const char *fileName);

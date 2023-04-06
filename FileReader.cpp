@@ -6,8 +6,9 @@
 
 using namespace std;
 
-// Autor: Lucas Mesías
-// Código original: Pablo Román  "testLoad.cpp"
+//! Autores:
+//! Código original: Pablo Román  "testLoad.cpp"
+//! Reestructuración: Lucas Mesías
 
 FileReader::FileReader(){}
 

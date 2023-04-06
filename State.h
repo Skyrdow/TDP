@@ -20,7 +20,6 @@ public:
     State *copy();
     void print();
     void printBits(unsigned int n);
-    void printPath();
 
     void swapBoatSide();
 };

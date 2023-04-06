@@ -30,6 +30,8 @@ State::State(int right, unsigned int finalStateValue, boatSide newBoatSide)
     this->previousState = nullptr;
 }
 
+/// @brief Función para imprimir en binario un número entero sin signo
+/// @param n número a imprimir
 void State::printBits(unsigned int n) {
     char* p = (char*)&n;
     for (int i = 3; i >= 0; i--) {

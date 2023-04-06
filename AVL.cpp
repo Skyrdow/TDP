@@ -3,6 +3,11 @@
 #include <iostream>
 using namespace std;
 
+//! Autores:
+//! Estructura AVL inicial: ChatGPT
+//! Integración con el proyecto: Lucas Mesias
+
+
 // Obtener la altura de un nodo
 int AVL::height(Node* node) {
     if (node == nullptr) {
@@ -178,6 +183,11 @@ AVL::AVL()
     rootLeft = nullptr;
     rootRight = nullptr;
 }
+AVL::~AVL()
+{
+    this->rootLeft->deleteAll();
+    this->rootRight->deleteAll();
+}
 // Insertar un valor en el árbol AVL
 void AVL::insert(State *value) {
     if (value->currentBoatSide == State::boatSide::left)
@@ -317,6 +327,7 @@ Node* AVL::balance(Node* root) {
 
     return root;
 }
+/// @brief Revisa si el árbol está vacío
 bool AVL::isEmpty()
 {
     if (this->rootLeft == nullptr && this->rootRight == nullptr)
@@ -324,3 +335,18 @@ bool AVL::isEmpty()
     return false;
 }
 
+/// @brief Imprime el árbol en inorder
+void AVL::printInorder() {
+    printInorder(this->rootLeft);
+    printInorder(this->rootRight);
+}
+
+/// @brief Imprime el árbol en inorder
+void AVL::printInorder(Node* node) {
+    if (node == nullptr) {
+        return;
+    }
+    printInorder(node->left);
+    std::cout << node->value->rightSide << " ";
+    printInorder(node->right);
+}
