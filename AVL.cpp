@@ -185,8 +185,10 @@ AVL::AVL()
 }
 AVL::~AVL()
 {
-    this->rootLeft->deleteAll();
-    this->rootRight->deleteAll();
+    if (this->rootLeft != nullptr)
+        this->rootLeft->deleteAll();
+    if (this->rootRight != nullptr)
+        this->rootRight->deleteAll();
 }
 // Insertar un valor en el árbol AVL
 void AVL::insert(State *value) {
