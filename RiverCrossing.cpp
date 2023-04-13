@@ -1,13 +1,28 @@
 #include <iostream>
-#include <vector>
 #include "RiverCrossing.h"
 #include "FileReader.h"
 
 using namespace std;
 
+/// @brief Constructor
+RiverCrossing::RiverCrossing()
+{
+    this->openAVL = new AVL();
+    this->closedAVL = new AVL();
+}
+
+/// @brief Destructor
+RiverCrossing::~RiverCrossing()
+{
+    delete[](this->leftRestrictionMatrix);
+    delete[](this->rightRestrictionMatrix);
+    delete(this->openAVL);
+    delete(this->closedAVL);
+}
+
 /// @brief Función para imprimir en binario un número entero sin signo
 /// @param n número a imprimir
-void RiverCrossing::printBits(unsigned int n) {
+void RiverCrossing::print32Bits(unsigned int n) {
     char* p = (char*)&n;
     for (int i = 3; i >= 0; i--) {
         for (int j = 7; j >= 0; j--) {
@@ -52,39 +67,28 @@ void RiverCrossing::quicksort(std::vector<Operation *>arr, int left, int right) 
 /// @brief Función envoltorio para quicksort
 void RiverCrossing::sortOperations()
 {
-    quicksort(this->operationHeap, 0, this->operationHeap.size()-1);
+    quicksort(this->operationVector, 0, this->operationVector.size()-1);
 }
 
-/// @brief Constructor
-RiverCrossing::RiverCrossing()
-{
-    this->openAVL = new AVL();
-    this->closedAVL = new AVL();
-}
-
-/// @brief Destructor
-RiverCrossing::~RiverCrossing()
-{
-    delete[](this->leftRestrictionMatrix);
-    delete[](this->rightRestrictionMatrix);
-    delete(this->openAVL);
-    delete(this->closedAVL);
-}
 
 /// @brief Función que imprime en la salida estándar las matrices leftRestrictionMatrix y rightRestrictionMatrix
 void RiverCrossing::printInfo()
-{
+{    
+    cout << "Conductores:" << driverCount
+         << " Items:" << itemCount 
+         << " Capacidad Botes:" << boatSize
+         << endl;
     cout<<"Restricciones Izq:"<<endl;
     for(int i = 0; i < this->leftRestrictionCount; i++)
     {
-        printBits(this->leftRestrictionMatrix[i]);
+        print32Bits(this->leftRestrictionMatrix[i]);
     }
     cout << endl;
 
     cout<<"Restricciones Der:"<<endl;
     for(int i = 0; i < this->rightRestrictionCount; i++)
     {
-        printBits(this->rightRestrictionMatrix[i]);
+        print32Bits(this->rightRestrictionMatrix[i]);
     }
     cout << endl;
 }
@@ -99,17 +103,13 @@ bool RiverCrossing::isFinalState(State *checkState)
     return false;
 }
 
-/// @brief Función que verifica si una operación realizada en un estado checkState es válida, es decir, si el conductor está presente y si el bote no excede su capacidad.
+/// @brief Función que verifica si una operación realizada en un estado checkState es válida, es decir, si el conductor está presente
 /// @param checkState Operación a revisar
 /// @return true si la entrada es válida
 bool RiverCrossing::isValidOperation(unsigned int checkState)
 {
     // revisar conductor, debe haber al menos 1
     if ((this->driverCheck & checkState) == 0)
-        return false;
-
-    // revisar bote, contando los 1s del movimiento
-    if (__builtin_popcount(checkState) > this->boatSize)
         return false;
 
     return true;
@@ -189,25 +189,44 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
     
     genOperations();
     
-    // printInfo();
+    printInfo();
     delete fr;
     return true;
+}
+
+/// @brief Genera las operaciones recursivamente
+/// @param result Arreglo final
+/// @param current Operación actual
+/// @param start indice inicial
+/// @param end indice final
+/// @param r cantidad máxima bote
+void RiverCrossing::generateCombinations(vector<Operation *>& result, unsigned int current, int start, int end, int r)
+{
+    int bitCount = __builtin_popcount(current);
+    if (bitCount >= 1 && bitCount <= r)
+    {
+        if (isValidOperation(current))
+            result.push_back(new Operation(current));
+    }
+    if (bitCount == r)
+    {
+        return;
+    }
+    for (int i = start; i <= end; i++)
+    {
+        current += 1 << (i - 1);
+        generateCombinations(result, current, i+1, end, r);
+        current -= 1 << (i - 1);
+    }
 }
 
 /// @brief Generar las operaciones válidas
 void RiverCrossing::genOperations()
 {
-    unsigned int operationTotal = (1 << this->totalItemCount);
-    for (unsigned int i = 0; i < operationTotal; i++)
-    {
-        if (!isValidOperation(i))
-            continue;
-        Operation *op = new Operation();
-        this->operationHeap.push_back(op);
-        // contar los 1s que tiene la operación
-        op->rightSideCount = __builtin_popcount(i);
-        op->result = i;
-    }
+    int n = this->totalItemCount; // N objetos
+    int r = this->boatSize; // R objetos a tomar
+    unsigned int combination = 0;
+    generateCombinations(this->operationVector, combination, 1, n, r);
     sortOperations();
 }
 
@@ -236,9 +255,9 @@ void RiverCrossing::solve(const char *fileName)
 
         closedAVL->insert(s);
         // recorrer el arreglo de ops desde el final
-        for (int i = this->operationHeap.size()-1; 0 <= i; i--)
+        for (int i = this->operationVector.size()-1; 0 <= i; i--)
         {
-            processState(s, this->operationHeap[i]->result);
+            processState(s, this->operationVector[i]->result);
         }
     }
     cout << "No hay solución" << endl;

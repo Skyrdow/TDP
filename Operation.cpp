@@ -1,9 +1,9 @@
 #include "Operation.h"
 
-Operation::Operation()
+Operation::Operation(unsigned int num)
 {
-    this->rightSideCount = 0;
-    this->result = 0;
+    this->rightSideCount = __builtin_popcount(num);
+    this->result = num;
 }
 
 Operation::~Operation()

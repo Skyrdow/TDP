@@ -6,9 +6,6 @@
 class RiverCrossing
 {
 private:
-    void quicksort(std::vector<Operation *>arr, int start, int end);
-    void printBits(unsigned int n);
-
     int driverCount;
     int itemCount;
     int totalItemCount;
@@ -24,8 +21,11 @@ private:
     AVL *openAVL;
     AVL *closedAVL;
 
+    std::vector<Operation *> operationVector;
     std::vector<Operation *> operationHeap;
     unsigned int operationIndex;
+
+    void print32Bits(unsigned int n);
 
     bool isFinalState(State *checkState);
     bool isValidOperation(unsigned int checkState);
@@ -34,9 +34,12 @@ private:
     void printFinalState(State *final);
     void processState(State *state, unsigned int move);
 
-    void sortOperations();
     void printInfo();
     bool getProblemInfo(const char *fileName);
+    
+    void quicksort(std::vector<Operation *>arr, int start, int end);
+    void sortOperations();
+    void generateCombinations(std::vector<Operation *>& result, unsigned int current, int start, int end, int r);
     void genOperations();
 public:
     RiverCrossing();

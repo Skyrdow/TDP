@@ -45,10 +45,6 @@ void FileReader::readCountLine()
     ss << this->countLine; 
     // leer los datos del stream
     ss >> this->driverCount >> this->itemCount >> this->boatSize; 
-    cout << "Conductores:" << driverCount
-         << " Items:" << itemCount 
-         << " Capacidad Botes:" << boatSize
-         << endl;
 }
 
 /// @brief Getter de la cantidad de conductores
@@ -69,7 +65,7 @@ int FileReader::readRestrictionSize()
     return atoi(line.c_str()); 
 }
 
-/// @brief Rellena la matriz izquierda de restricciones
+/// @brief Rellena la matriz de restricciones
 /// @param restrMatrix matriz con memoria ya asignada, esta se modifica
 /// @param restrCount cantidad de restricciones
 void FileReader::fillRestrMatrix(unsigned int *restrMatrix, int restrCount)

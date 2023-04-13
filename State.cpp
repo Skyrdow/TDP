@@ -1,11 +1,6 @@
 #include "State.h"
 #include <iostream>
-#include <bitset>
 
-State::~State()
-{
-
-}
 
 /// @brief Constructor de State, distintas versiones aplican valores por defecto
 /// @param right numero entero sin signo que representa todos los objetos
@@ -32,7 +27,7 @@ State::State(int right, unsigned int finalStateValue, boatSide newBoatSide)
 
 /// @brief Función para imprimir en binario un número entero sin signo
 /// @param n número a imprimir
-void State::printBits(unsigned int n) {
+void State::print32Bits(unsigned int n) {
     char* p = (char*)&n;
     for (int i = 3; i >= 0; i--) {
         for (int j = 7; j >= 0; j--) {
@@ -47,9 +42,9 @@ void State::print()
     // A will hold the binary representation of N 
     if (this->previousState != nullptr)
         this->previousState->print();
-    printBits(~this->rightSide & this->finalStateValue);
+    print32Bits(~this->rightSide & this->finalStateValue);
     std::cout << "|";
-    printBits(this->rightSide);
+    print32Bits(this->rightSide);
     std::cout << std::endl;
 }
 

@@ -1,7 +1,7 @@
 #include "../RiverCrossing.h"
 #include <string>
 #include <iostream>
-#include <ctime>
+// // #include <ctime>
 
 using namespace std;
 
@@ -26,10 +26,9 @@ int main() {
         t_ini = clock();
         RiverCrossing *r = new RiverCrossing();
         r->solve(nombreArchivo.c_str());
-        delete r;
         t_fin = clock();
         secs = secs + (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
-        // delete r;
+        delete r;
     }
     cout << endl << "Tiempo promedio: " << secs/numVeces << " segundos" << endl;
     

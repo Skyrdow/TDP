@@ -213,7 +213,7 @@ void AVL::remove(State *value) {
     }
 }
 
-// Buscar un valor en el árbol AVL
+// Buscar un valor en uno de los árboles AVL
 bool AVL::_search(int value, bool left) {
     Node *current;
     if (left)
@@ -232,6 +232,8 @@ bool AVL::_search(int value, bool left) {
     }
     return false;
 }
+
+// Buscar un estado en su árbol correspondiente
 bool AVL::search(State *value) {
     if (value->currentBoatSide == State::boatSide::left)
         return _search(value->rightSide, 1);
@@ -240,6 +242,7 @@ bool AVL::search(State *value) {
     return false;
 }
 
+// Obtener el nodo máximo y eliminarlo del árbol
 State *AVL::pop(State::boatSide boatSide)
 {
     if (boatSide == State::boatSide::left)
