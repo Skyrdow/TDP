@@ -23,9 +23,9 @@ int main() {
     cout << endl << "Resolviendo el problema " << nombreArchivo <<", "<< numVeces << " veces..." << endl;
     
     for (k=0; k<numVeces; k++) {
+        RiverCrossing *r = new RiverCrossing(nombreArchivo.c_str());
         t_ini = clock();
-        RiverCrossing *r = new RiverCrossing();
-        r->solve(nombreArchivo.c_str());
+        r->solve();
         t_fin = clock();
         secs = secs + (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
         delete r;

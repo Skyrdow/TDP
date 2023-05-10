@@ -42,8 +42,11 @@ private:
     void generateCombinations(std::vector<Operation *>& result, unsigned int current, int start, int end, int r);
     void genOperations();
 public:
-    RiverCrossing();
+    RiverCrossing(const char *fileName);
     ~RiverCrossing();
+    
+    // si es true se usan prints
+    bool print;
 
-    void solve(const char *fileName);
+    void solve();
 };

@@ -18,6 +18,7 @@ FileReader::~FileReader()
     this->inputFile->close();
     delete this->inputFile;
 }
+
 /// @brief Abre el archivo
 /// @param fileName nombre del archivo
 /// @return true si se abre correctamente, en caso contrario, false
@@ -31,7 +32,6 @@ bool FileReader::openFile(const char *fileName)
 
     }
     // std::cout << "archivo no encontrado" << std::endl;
-    delete this->inputFile;
     return false;
     
 }

@@ -1,6 +1,6 @@
 all: test testAVL testFileReader testNode testOperation testState
 test: tests/test.cpp RiverCrossing.cpp
-	g++ -o test *.cpp tests/test.cpp
+	g++ -O2 -o test *.cpp tests/test.cpp
 testAVL: 
 	g++ -o testAVL *.cpp tests/testAVL.cpp
 testFileReader: 

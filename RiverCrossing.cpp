@@ -5,10 +5,17 @@
 using namespace std;
 
 /// @brief Constructor
-RiverCrossing::RiverCrossing()
+RiverCrossing::RiverCrossing(const char *fileName)
 {
     this->openAVL = new AVL();
     this->closedAVL = new AVL();
+    
+    // leer el archivo
+    if (!getProblemInfo(fileName))
+    {
+        cout << "error de lectura" << endl;
+        exit(1);
+    }
 }
 
 /// @brief Destructor
@@ -172,11 +179,6 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
     
     this->finalStateValue = (1 << this->totalItemCount) - 1;
     
-    //! Lineas comentadas para evitar prints a consola y mejorar velocidad
-    // cout << "Condición final: \n";
-    // printBits(this->finalStateValue);
-    // cout << endl;
-    
     this->driverCheck = (1 << this->driverCount) - 1;
 
     this->leftRestrictionCount = fr->readRestrictionSize();
@@ -189,7 +191,15 @@ bool RiverCrossing::getProblemInfo(const char *fileName)
     
     genOperations();
     
-    printInfo();
+    
+    if (this->print)
+    {
+        cout << "Condición final: \n";
+        print32Bits(this->finalStateValue);
+        cout << endl;
+        printInfo();
+    }
+
     delete fr;
     return true;
 }
@@ -231,12 +241,8 @@ void RiverCrossing::genOperations()
 }
 
 /// @brief Función principal que resuelve el problema
-/// @param fileName Nombre del archivo que contiene la información del problema
-void RiverCrossing::solve(const char *fileName)
+void RiverCrossing::solve()
 {
-    // leer el archivo
-    if (!getProblemInfo(fileName))
-        return;
     // Estado [0, 0, 0, ..., 0]
     State *currentState = new State(0, this->finalStateValue);
     // Lado inicial del bote derecho, ya que se invierte al inicio del loop
@@ -251,7 +257,12 @@ void RiverCrossing::solve(const char *fileName)
 
         State *s = this->openAVL->pop(side);
 
-        if (isFinalState(s)) { return printFinalState(s); }
+        if (isFinalState(s))
+        {
+            if (this->print)
+                printFinalState(s);
+            return;
+        }
 
         closedAVL->insert(s);
         // recorrer el arreglo de ops desde el final
