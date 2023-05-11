@@ -13,6 +13,8 @@ int main() {
 
     int k, numVeces;
     string nombreArchivo;
+    string resp;
+    bool flagResp = false;
 
     cout << "Cuantas veces quieres que se resuelva el problema? ";
     cin >> numVeces;
@@ -20,10 +22,20 @@ int main() {
     cout << endl << "Indique el nombre de archivo:  " ;
     cin >> nombreArchivo;
 
+
+    cout << endl << "Usar prints? [Y/N]" ;
+    cin >> resp;
+
+    if ("Y" == resp || "y" == resp)
+        flagResp = true;
+    if ("N" == resp || "n" == resp)
+        flagResp = false;
+
     cout << endl << "Resolviendo el problema " << nombreArchivo <<", "<< numVeces << " veces..." << endl;
     
     for (k=0; k<numVeces; k++) {
         RiverCrossing *r = new RiverCrossing(nombreArchivo.c_str());
+        r->print = flagResp; // Desactivar prints
         t_ini = clock();
         r->solve();
         t_fin = clock();
