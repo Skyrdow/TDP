@@ -1,6 +1,7 @@
 #ifndef _NODE_H_
 #define _NODE_H_
 
+#pragma once
 #include <iostream>
 
 class Node {
@@ -16,8 +17,6 @@ public:
     int type;
     int getType();
     virtual void print() = 0;
-    Node *parent;
-    bool visited;
 };
 
 #endif

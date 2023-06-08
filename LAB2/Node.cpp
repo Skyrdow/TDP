@@ -2,8 +2,6 @@
 
 Node::Node() {
     type = INVALID;
-    parent = nullptr;
-    visited = false;
 }
 
 Node::~Node() {

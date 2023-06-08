@@ -5,228 +5,339 @@
 #include <iomanip>
 
 #include <stack>
+#include <vector>
 #include <cmath>
 
 
 #include "Node_Operation.h"
 #include "Node_Number.h"
 #include "Node_Variable.h"
+#include "loadFile.h"
 
 using namespace std;
 
+
 // Solo cuando ambos operandos son numeros
-int operate(char operation, int l, int r) {
-        switch(operation) {
-            case '+': // OJO con los BREAK
-                return l + r;
-            case '-':
-                return l - r;
-            case '*':
-                return l * r;
-            case '^':
-                return pow(l,r);
-            default:
-                cout << "Error" << endl;
-                exit(1);
-        }
+int operate(char operation, int l, int r)
+{
+	switch(operation) {
+		case '+': // OJO con los BREAK
+			return l + r;
+		case '-':
+			return l - r;
+		case '*':
+			return l * r;
+		case '^':
+			return pow(l,r);
+		default:
+			cout << "Error" << endl;
+			exit(1);
+	}
 
 }
 
 bool isOperator(string token) {
-    return token == "+" || token == "-" || token == "*" || token == "^";
+	return token == "+" || token == "-" || token == "*" || token == "^";
 }
 
 bool isNumber(string token) {
-    return token[0] >= '0' && token[0] <= '9';
+	return token[0] >= '0' && token[0] <= '9';
 }
 
 bool isVariable(string token) {
-    return (token[0] >= 'a' && token[0] <= 'z') || (token[0] >= 'A' && token[0] <= 'Z');
+	return (token[0] >= 'a' && token[0] <= 'z') || (token[0] >= 'A' && token[0] <= 'Z');
 }
 
 bool isNodeOperation(Node *node) {
-    return node->type == OPERATOR;
+	return node->type == OPERATOR;
 }
 
+Node *simplify_basic(Node *node)
+{
+	// No se puede hacer nada
+	if (!isNodeOperation(node))
+		return node;
+	Node_Operation *op_node = (Node_Operation *)node;
+	Node *left = op_node->left;
+	Node *right = op_node->right;
+	switch(op_node->operation)
+	{
+		case '-':
+			// a - a = 0
+			if (left->type == NUMBER && left->type == NUMBER)
+				if (((Node_Number *)right)->value == ((Node_Number *)left)->value)
+					return new Node_Number(0);
+			if (left->type == VARIABLE && left->type == VARIABLE)
+				if (((Node_Variable *)right)->name == ((Node_Variable *)left)->name)
+					return new Node_Number(0);
+		case '+':
+			// a + 0 = a || a - 0 = a
+			if (left->type == NUMBER)
+				if (((Node_Number *)left)->value == 0)
+					return right;
+			if (right->type == NUMBER)
+				if (((Node_Number *)right)->value == 0)
+					return left;
+			return node;
+		case '*':
+			// a * 0 = 0 || a * 1 = a
+			if (left->type == NUMBER)
+			{
+				if (((Node_Number *)left)->value == 0)
+					return new Node_Number(0);
+				if (((Node_Number *)left)->value == 1)
+					return right;
+			}
+			if (right->type == NUMBER)
+				if (((Node_Number *)right)->value == 0)
+					return new Node_Number(0);
+				if (((Node_Number *)right)->value == 1)
+					return left;
+			return node;
+		case '^':
+			// 0 ^ a = 0
+			if (left->type == NUMBER)
+				if (((Node_Number *)left)->value == 0)
+					return new Node_Number(0);
+			// a ^ 1 = a || a ^ 0 = 1
+			if (right->type == NUMBER)
+				if (((Node_Number *)right)->value == 0)
+					return new Node_Number(1);
+				if (((Node_Number *)right)->value == 1)
+					return left;
+			return node;
+		default:
+			cout << "Error" << endl;
+			exit(1);
+	}
+}
+
+Node *operateNode(Node_Operation *op)
+{
+	Node_Number *l_number = ((Node_Number*)op->left);
+	Node_Number *r_number = ((Node_Number*)op->right);
+	int operation_result = operate(op->operation, l_number->value, r_number->value);
+	Node_Number* num = new Node_Number(operation_result);
+	// actualizando el link al padre
+	delete op;  //----> OJO con esto
+
+	cout << "VALOR OPERACION: " << num->value << endl;
+	return num;
+}
+
+
+Node* eval(Node* node, vector<char> var_names, vector<int> var_values)
+{
+	if (node->type == VARIABLE)
+	{
+		char var_name = ((Node_Variable *)node)->name;
+		for (int i = 0; i < var_names.size(); i++)
+		{
+			if (var_name == var_names[i])
+				return new Node_Number(var_values[i]);
+		}
+		return node;
+	}
+	if (isNodeOperation(node))
+	{
+		// evaluamos POSTORDER
+		Node_Operation *op = (Node_Operation *)node;
+		op->left = eval(op->left, var_names, var_values);
+		op->right = eval(op->right, var_names, var_values);
+		op->left = simplify_basic(op->left);
+		op->right = simplify_basic(op->right);
+
+		if (op->left->type == NUMBER && op->right->type == NUMBER)
+			return operateNode(op);
+		return op;
+	} 
+	if (node->type == NUMBER)
+		return node;
+	cout << "Error: se encontro algo distinto a operador o numero o variable" << endl;
+	exit(1);
+}
 
 // solo evalua num op num y modifica el arbol!!!
-Node* eval(Node* node) {
-    
-    if (isNodeOperation(node)) {
-            // evaluamos POSTORDER
-        Node_Operation *op = (Node_Operation *)node;
-        Node * l = eval(op->left);
-        Node * r = eval(op->right);
-
-        
-        if (l->type == NUMBER && r->type == NUMBER) {
-            Node_Number* num = new Node_Number(operate(op->operation, 
-                                                       ((Node_Number*)l)->value, 
-                                                       ((Node_Number*)r)->value));
-            // actualizando el link al padre
-            num->parent = op->parent;
-            Node_Operation *parent = (Node_Operation *)op->parent;
-            // actualizando el izq o derecho del padre
-            if (op->parent!=nullptr && parent->left==op) {
-                parent->left = num;
-            } else if (op->parent!=nullptr && parent->right==op) {
-                parent->right = num;
-            }
-            //delete op;  //----> OJO con esto
-
-            cout << "VALOR OPERACION: " << num->value << endl;
-            return num;
-        } else {
-            op->left = l;
-            op->right = r;
-            return op;
-        }
-    } else if (node->type == NUMBER) {
-        return node;
-    } else if (node->type == VARIABLE) {
-        return node;
-    } else {
-        cout << "Error: se encontro algo distinto a operador o numero o variable" << endl;
-        exit(1);
-    }
-}
-
-Node *Clone(Node *old)
+Node* eval(Node* node)
 {
-  if (isNodeOperation(old))
-  {
-    Node_Operation *old_op = (Node_Operation *)old;
-    Node_Operation *new_node = new Node_Operation(old_op->operation);
-    new_node->left = Clone(old_op->left);
-    new_node->right = Clone(old_op->right);
-    return new_node;
-  }
-  if (old->type == NUMBER)
-  {
-    Node_Number *old_num = (Node_Number *)old;
-    return new Node_Number(old_num->value);
-  }
-  if (old->type == VARIABLE)
-  {
-    Node_Variable *old_var = (Node_Variable *)old;
-    return new Node_Variable(old_var->name);
-  }
-  return nullptr;
+	if (node->type == OPERATOR) 
+	{
+		// evaluamos POSTORDER
+		Node_Operation *op = (Node_Operation *)node;
+		op->left = eval(op->left);
+		op->right = eval(op->right);
+		op->left = simplify_basic(op->left);
+		op->right = simplify_basic(op->right);
+
+		if (op->left->type == NUMBER && op->right->type == NUMBER)
+			return operateNode(op);
+		return op;
+	} 
+	else if (node->type == VARIABLE || node->type == NUMBER)
+		return node;
+	cout << "Error: se encontro algo distinto a operador o numero o variable" << endl;
+	exit(1);
 }
+
+Node *clone(Node *old)
+{
+	if (old->type == OPERATOR)
+	{
+		Node_Operation *old_op = (Node_Operation *) old;
+		return new Node_Operation(old_op->operation,
+									clone(old_op->left),
+									clone(old_op->right));
+	}
+	if (old->type == NUMBER)
+	{
+		Node_Number *old_num = (Node_Number *) old;
+		return new Node_Number(old_num->value);
+	}
+	if (old->type == VARIABLE)
+	{
+		Node_Variable *old_var = (Node_Variable *) old;
+		return new Node_Variable(old_var->name);
+	}
+	cout<<"BIG PROBLEM"<< endl;
+	exit(1);
+}
+
+
+Node *derive(Node *node, char derive_var);
+
+Node *derive_sumsub(Node_Operation *op_node, char derive_var)
+{
+	op_node->left = derive(op_node->left, derive_var);
+	op_node->right = derive(op_node->right, derive_var);
+	return op_node;
+}
+
+Node *derive_mult(Node_Operation *op_node, char derive_var)
+{
+	// reusar el nodo original
+	Node_Operation *right_multiplication = new Node_Operation('*');
+	right_multiplication->left = op_node->left;
+	right_multiplication->right = derive(clone(op_node->right), derive_var);
+
+	Node_Operation *left_multiplication = op_node;
+	left_multiplication->left = derive(clone(op_node->left), derive_var);
+	left_multiplication->right = op_node->right;
+
+	return new Node_Operation('+', left_multiplication, right_multiplication);
+}
+
+Node *derive_pow(Node_Operation *op_node, char derive_var)
+{
+	if (op_node->right <= 0)
+	{
+		cout << "Potencia negativa" << endl;
+		exit(1);
+	}
+	// op_node->left = op_node->left; comentado, se mantiene
+	Node *old_right_node = op_node->right;
+
+	int right_value = ((Node_Number *)op_node->right)->value;
+	op_node->right = new Node_Number(right_value - 1);
+
+	Node *left_derivative = derive(clone(op_node->left), derive_var);
+	Node_Operation *right_mult = new Node_Operation('*', op_node, left_derivative);
+	return new Node_Operation('*', old_right_node, right_mult);
+}
+
+Node *derive_operation(Node_Operation *op_node, char derive_var)
+{
+	switch (op_node->operation)
+	{
+		case '+':
+		case '-':
+			return derive_sumsub(op_node, derive_var);
+		case '*':
+			return derive_mult(op_node, derive_var);
+		case '^':
+			return derive_pow(op_node, derive_var);
+		default:
+			cout << "Error" << endl;
+			exit(1);
+	}
+}
+
+
+Node *derive(Node *node, char derive_var)
+{
+	if (node->type != OPERATOR)
+	{
+		if (node->type == VARIABLE)
+		{
+			char var_name = ((Node_Variable *)node)->name;
+			delete node;
+			if (var_name == derive_var)
+				return new Node_Number(1);
+			return new Node_Number(0); // node_var->name != derive_var
+		}
+		if (node->type == NUMBER)
+		{
+			((Node_Number *)node)->value = 0;
+			return node;
+		}
+	} // node->type == OPERATOR
+	return derive_operation((Node_Operation *) node, derive_var);
+}
+
 
 void print(Node *node)
 {
-  if (isNodeOperation(node))
-  {
-    Node_Operation *node_op = (Node_Operation *)node;
-    cout << node_op->operation << " ";
-    print(node_op->left);
-    print(node_op->right);
-  }
-  if (node->type == NUMBER)
-  {
-    Node_Number *node_num = (Node_Number *) node;
-    cout << node_num->value<< " ";
-  }
-  if (node->type == VARIABLE)
-  {
-    cout << "asd"; 
-  } 
+	cout << " ";
+	if (node->type == OPERATOR)
+	{
+		Node_Operation *node_op = (Node_Operation *)node;
+		node_op->print();
+		print(node_op->left);
+		print(node_op->right);
+	}
+	else
+		node->print();
+}
+
+void printAST(Node* p, int indent=0)
+{
+    if (p == NULL) return;
+
+	if (p->type == OPERATOR)
+	{
+		Node_Operation *op = (Node_Operation *) p;
+		if(op->left) 
+			printAST(op->left, indent+4);
+		if (indent)
+			std::cout << std::setw(indent) << ' ';
+		p->print();
+		std::cout << std::endl;
+		if(op->right)
+			printAST(op->right, indent+4);
+	} 
+	else
+	{
+		if (indent)
+			std::cout << std::setw(indent) << ' ';
+		p->print();
+		std::cout << std::endl;
+	}
 }
 
 int main() {
-    
-    ifstream file("expr1.txt");
-    if (!file.is_open()) {
-        cout << "Could not open file " << endl;
-        return 1;
-    }
-    Node_Operation *op = nullptr; 
-    Node_Number *num = nullptr;
-    Node_Variable *var = nullptr;
-    Node* node= nullptr;
-    Node* root=nullptr;
 
-    string line, token;
-    stringstream ss;
+	const char* filename = "expr1.txt";
+	char* mutableFilename = const_cast<char*>(filename);
+	loadFile *lf = new loadFile(mutableFilename);
+	Node *root = lf->readfile();
+	
 
-    stack<Node_Operation*> pila;
-
-    if (getline(file, line, '\n')) {
-        cout << line << endl;
-        ss << line;
-        // si stream ss es "+ * - 1 2 3"
-        // el primer get line obtiene "+" 
-        while(getline(ss, token, ' ')) {
-            cout << token << endl;
-
-            // 1) creamos el nodo dependiendo del token
-            if (isOperator(token)) {
-                cout << "Es un operador" << token << endl;
-                node = new Node_Operation(token[0]);
-                if (!pila.empty()) { 
-                    ((Node_Operation*)node)->parent = pila.top();
-                } else {
-                    ((Node_Operation*)node)->parent = nullptr;
-                }
-
-            } else if (isNumber(token)) {
-                cout << "Es un numero: " << token << endl;
-                int valor = stoi(token);
-                node = new Node_Number(valor);
-
-            } else if (isVariable(token)) {
-                cout << "Es un identificador: " << token << endl;
-                char name= token[0];
-                node = new Node_Variable(name);
-            }
-
-            // 2) si es el primer nodo es la raiz
-            if (root == nullptr) {
-                root = node;
-            }
-
-            // 3) dependiendo del top del stack se agrega a la izquierda o derecha
-            if (!pila.empty()) {
-                // asignacion del padre
-                node->parent = pila.top();    
-
-                if (pila.top()->left == nullptr) {  
-                    pila.top()->left = node;
-                                } else 
-                if (pila.top()->right == nullptr){
-                        pila.top()->right = node;
-                        pila.pop();
-                } else {
-                        cout << "Error" << endl;
-                        exit(1);
-                }
-            }
-
-            // 4) si es un operador se agrega a la pila
-            if (node->type == OPERATOR) {
-                    pila.push((Node_Operation*)node);
-                
-            }
-
-        }
-    } else {
-        cout << "Could not read line" << endl;
-        return 1;
-    }
-
-    cout << "Evaluacion: " << endl;
-    print(root);
-    eval(root);
-    
-    Node *root2 = Clone(root);
-    print(root2);
-    delete(root);
-print(root2);
-
-    cout << eval(root2) << endl;
-//    root = eval_recursive(root);
-//
-    file.close();
-    return 0;
+	printAST(root);
+	cout << "Evaluacion: " << endl;
+	// vector<char> vars = {'x', 'y'};
+	// vector<int> vals = {1, 2};
+	// root = derive(root, 'x');
+	// printAST(root);
+	root = eval(root);
+	printAST(root);
+	return 0;
 }
