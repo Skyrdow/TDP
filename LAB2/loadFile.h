@@ -6,7 +6,6 @@
 #include <iomanip>
 
 #include <stack>
-#include <vector>
 
 #include "Node_Operation.h"
 #include "Node_Number.h"
@@ -20,9 +19,9 @@ private:
     bool isOperator(string token);
     bool isNumber(string token);
     bool isVariable(string token);
-    char *filename;
+    const char *filename;
 public:
     Node *readfile();
-    loadFile(char *filename);
+    loadFile(const char *filename);
     ~loadFile();
 };

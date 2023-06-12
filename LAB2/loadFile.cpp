@@ -1,6 +1,6 @@
 #include "loadFile.h"
 
-loadFile::loadFile(char *filename)
+loadFile::loadFile(const char *filename)
 {
     this->filename = filename;
 }
