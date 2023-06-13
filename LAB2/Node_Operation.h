@@ -1,6 +1,8 @@
 #pragma once
 #include "Node.h"
 
+/// @brief Nodo de tipo operación, almacena un char que 
+/// representa la operación y 2 nodos para operar
 class Node_Operation : public Node {
 public:
     Node_Operation(char operation, Node *left, Node *right);

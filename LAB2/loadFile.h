@@ -11,8 +11,8 @@
 #include "Node_Number.h"
 #include "Node_Variable.h"
 
-// sstream es un stream de caracteres
 using namespace std;
+/// Código entregado por el profesor Pablo Román
 class loadFile
 {
 private:

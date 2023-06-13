@@ -1,5 +1,5 @@
 #include "loadFile.h"
-
+//! Constructor y destructor vacíos
 loadFile::loadFile()
 {
 }
@@ -8,20 +8,25 @@ loadFile::~loadFile()
 {
 }
 
+/// @brief Revisar si una string es un operador definido
 bool loadFile::isOperator(string token) {
     return token == "+" || token == "-" || token == "*" || token == "^";
 }
 
+/// @brief Revisar si una string es un número
 bool loadFile::isNumber(string token) {
     return token[0] >= '0' && token[0] <= '9';
 }
 
+/// @brief Revisar si una string es una variable
 bool loadFile::isVariable(string token) {
     return (token[0] >= 'a' && token[0] <= 'z') || (token[0] >= 'A' && token[0] <= 'Z');
 }
 
+/// @brief Lee el archivo de entrada
+/// @param filename Nombre del archivo en formato {nombre}.txt
 Node *loadFile::readfile(const char *filename) {
-    
+    // Abrir archivo
     ifstream file(filename);
     if (!file.is_open()) {
         cout << "Could not open file " << endl;
@@ -37,7 +42,7 @@ Node *loadFile::readfile(const char *filename) {
     stringstream ss;
 
     stack<Node_Operation*> pila;
-
+    // Loop de lectura y creación del árbol inicial
     if (getline(file, line, '\n')) {
         //cout << line;
         ss << line;
@@ -89,6 +94,7 @@ Node *loadFile::readfile(const char *filename) {
 
         }
     }
+    // Se cierra el archivo y se retorna el árbol
     file.close();
     return root;
 }

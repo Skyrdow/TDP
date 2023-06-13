@@ -9,17 +9,11 @@
 
 using namespace std;
 
+/// Clase Abstract Syntax Tree
 class AST
 {
 private:
     int operate(char operation, int l, int r);
-    bool isNodeOperation(Node *node);
-    bool isNodeNumber(Node *node);
-    bool isNodeVariable(Node *node);
-    char get_operation(Node *node);
-    int get_value(Node *node);
-    char get_name(Node *node);
-    char get_var(Node *node);
     bool equal(Node *node_1, Node *node_2);
     Node *simplify_var_pow(Node *node);
     void get_sum_elements(Node *node, vector<Node *> &elems);
