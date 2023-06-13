@@ -144,6 +144,7 @@ Node *AST::simplify(Node *node)
 	Node_Operation *op_node = (Node_Operation *)node;
 	Node *left = op_node->left;
 	Node *right = op_node->right;
+	// Casos implementados de simplificación
 	switch(op_node->operation)
 	{
 		case '-':
@@ -288,30 +289,45 @@ Node *AST::simplify(Node *node)
 	}
 }
 
+/// @brief Realizar operación entre nodos de tipo número
+/// @param op Nodo operación, del cual ya se sabe que sus hijos son números
+/// Código entregado por Pablo Román
 Node *AST::operateNode(Node_Operation *op)
 {
 	Node_Number *l_number = ((Node_Number*)op->left);
 	Node_Number *r_number = ((Node_Number*)op->right);
 	int operation_result = operate(op->operation, l_number->value, r_number->value);
 	Node_Number* num = new Node_Number(operation_result);
-	// actualizando el link al padre
-	delete op;  //----> OJO con esto
-
-	// cout << "VALOR OPERACION: " << num->value << endl;
+	delete op;
 	return num;
 }
 
+/// @brief Reemplaza un nodo que ya se sabe que es una variable por un número
+/// @param node Nodo variable que va a ser reemplazado
+/// @param var_names Vector que contiene los nombres de las variables a reemplazar
+/// @param var_values Vector que contiene los valores de las variables a reemplazar
+/// Ambos vectores deben tener el mismo tamaño, 
+/// y los valores y variables a reemplazar deben estar en la misma posición.
 Node *AST::replace_var(Node *node, vector<char> var_names, vector<int> var_values)
 {
 	char var_name = ((Node_Variable *)node)->name;
 	for (int i = 0; i < var_names.size(); i++)
 	{
 		if (var_name == var_names[i])
+		{
+			delete node;
 			return new Node_Number(var_values[i]);
+		}
 	}
 	return node;
 }
 
+/// @brief Recorre el árbol buscando nodos variables para reemplazar con valores
+/// @param node Raíz recursiva
+/// @param var_names Vector que contiene los nombres de las variables a reemplazar
+/// @param var_values Vector que contiene los valores de las variables a reemplazar
+/// Ambos vectores deben tener el mismo tamaño, 
+/// y los valores y variables a reemplazar deben estar en la misma posición.
 Node* AST::recursive_replace(Node* node, vector<char> var_names, vector<int> var_values)
 {
 	if (node->type == VARIABLE)
@@ -494,8 +510,8 @@ void AST::printAST(Node* p, int indent)
 Node* AST::evaluate(Node* node)
 {
 	// node = expand(node); función no implementada
-	node = sum_tree(node);
 	node = eval(node);
+	node = sum_tree(node);
 	return node;
 }
 
