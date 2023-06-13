@@ -1,8 +1,7 @@
 #include "loadFile.h"
 
-loadFile::loadFile(const char *filename)
+loadFile::loadFile()
 {
-    this->filename = filename;
 }
 
 loadFile::~loadFile()
@@ -21,7 +20,7 @@ bool loadFile::isVariable(string token) {
     return (token[0] >= 'a' && token[0] <= 'z') || (token[0] >= 'A' && token[0] <= 'Z');
 }
 
-Node *loadFile::readfile() {
+Node *loadFile::readfile(const char *filename) {
     
     ifstream file(filename);
     if (!file.is_open()) {

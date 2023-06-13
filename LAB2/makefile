@@ -2,8 +2,8 @@ FLAGS = -g
 
 all: parser
 
-parser: test.cpp AST.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
-	g++ $(FLAGS) -o parser Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o AST.o test.cpp
+parser: main.cpp AST.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+	g++ $(FLAGS) -o parser Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o AST.o main.cpp
 
 AST.o: AST.cpp AST.h
 	g++ $(FLAGS) -c AST.cpp

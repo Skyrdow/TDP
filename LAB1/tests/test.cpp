@@ -1,11 +1,9 @@
 #include "../RiverCrossing.h"
 #include <string>
 #include <iostream>
-// // #include <ctime>
+#include <ctime>
 
 using namespace std;
-
-
 
 int main() {
     clock_t t_ini, t_fin;

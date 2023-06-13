@@ -45,10 +45,6 @@ char AST::get_name(Node *node) {
 	Node_Variable *node_var = (Node_Variable *)node;
 	return node_var->name;
 }
-int AST::get_pow(Node *node) {
-	Node_Variable *node_var = (Node_Variable *)node;
-	return node_var->pow;
-}
 
 bool AST::equal(Node *node_1, Node *node_2)
 {
@@ -97,39 +93,13 @@ char AST::get_var(Node *node)
 	exit(5);
 }
 
-Node *AST::simplify_var_pow(Node *node)
-{
-	if (!isNodeOperation(node))
-		return node;
-
-	Node_Operation *op_node = (Node_Operation *)node;
-	if (get_operation(op_node) == '^')
-	{
-		if (isNodeVariable(op_node->left))
-		{
-			op_node->right = eval(op_node->right);
-			if (isNodeNumber(op_node->right))
-				return new Node_Variable(get_name(op_node->left),
-											get_value(op_node->right));
-		}
-	}
-	op_node->left = simplify_var_pow(op_node->left);
-	op_node->right = simplify_var_pow(op_node->right);
-	return op_node;
-}
-
-Node *AST::expand(Node *node)
-{
-	
-}
-
-Node *AST::simplify(Node * node)
+Node *AST::sum_tree(Node * node)
 {
 	if (!isNodeOperation(node))
 		return node;
 
 	Node_Operation *op = (Node_Operation *)node;
-	// sum tree
+	// revisar si es suma
 	if (get_operation(op) == '+')
 	{
 		vector<Node *> elems;
@@ -182,14 +152,14 @@ void AST::get_sum_elements(Node *node, vector<Node *> &elems)
 	get_sum_elements(op_node->right, elems);
 }
 
-Node *AST::simplify_basic(Node *node)
+Node *AST::simplify(Node *node)
 {
 	// No se puede hacer nada
 	if (!isNodeOperation(node))
 		return node;
-	cout << "----------" << endl;
-	printAST(node);
-	cout << "----------" << endl;
+	// cout << "----------" << endl;
+	// printAST(node);
+	// cout << "----------" << endl;
 	Node_Operation *op_node = (Node_Operation *)node;
 	Node *left = op_node->left;
 	Node *right = op_node->right;
@@ -392,17 +362,12 @@ Node* AST::eval(Node* node)
 
 		if (isNodeNumber(op->left) && isNodeNumber(op->right))
 			return operateNode(op);
-		return simplify_basic(op);
+		return simplify(op);
 	} 
 	else if (node->type == VARIABLE || node->type == NUMBER)
 		return node;
 	cout << "Error: se encontro algo distinto a operador o numero o variable" << endl;
 	exit(1);
-}
-Node* AST::eval(Node* node, vector<char> var_names, vector<int> var_values)
-{
-	node = recursive_replace(node, var_names, var_values);
-	return eval(node);
 }
 
 Node *AST::clone(Node *old)
@@ -437,18 +402,18 @@ Node *AST::derive_sumsub(Node_Operation *op_node, char derive_var)
 
 Node *AST::derive_mult(Node_Operation *op_node, char derive_var)
 {
-	// reusar el nodo original
 	Node_Operation *right_multiplication = new Node_Operation('*');
 	right_multiplication->left = op_node->left;
 	right_multiplication->right = derive(clone(op_node->right), derive_var);
 
+	// reusar el nodo original
 	Node_Operation *left_multiplication = op_node;
 	left_multiplication->left = derive(clone(op_node->left), derive_var);
 	left_multiplication->right = op_node->right;
 
-	return new Node_Operation('+', 
-								simplify_basic(left_multiplication),
-								simplify_basic(right_multiplication));
+	return simplify(new Node_Operation('+', 
+								simplify(left_multiplication),
+								simplify(right_multiplication)));
 }
 
 Node *AST::derive_pow(Node_Operation *op_node, char derive_var)
@@ -460,10 +425,10 @@ Node *AST::derive_pow(Node_Operation *op_node, char derive_var)
 	op_node->right = new Node_Number(right_value - 1);
 
 	Node *left_derivative = derive(clone(op_node->left), derive_var);
-	Node_Operation *right_mult = new Node_Operation('*', op_node, left_derivative);
-	return new Node_Operation('*', 
-								old_right_node,
-								simplify_basic(right_mult));
+	Node *right_mult = eval(new Node_Operation('*', op_node, left_derivative));
+	return simplify(new Node_Operation('*', 
+								eval(old_right_node),
+								simplify(right_mult)));
 }
 
 Node *AST::derive_operation(Node_Operation *op_node, char derive_var)
@@ -502,7 +467,7 @@ Node *AST::derive(Node *node, char derive_var)
 			return node;
 		}
 	} // node->type == OPERATOR
-	return simplify_basic(derive_operation((Node_Operation *) node, derive_var));
+	return simplify(derive_operation((Node_Operation *) node, derive_var));
 }
 
 
@@ -545,6 +510,19 @@ void AST::printAST(Node* p, int indent)
 	}
 }
 
+Node* AST::evaluate(Node* node)
+{
+	node = eval(node);
+	// node = expand(node); función no implementada
+	node = sum_tree(node);
+	return node;
+}
+
+Node* AST::evaluate(Node* node, vector<char> var_names, vector<int> var_values)
+{
+	node = recursive_replace(node, var_names, var_values);
+	return evaluate(node);
+}
 
 AST::AST(/* args */){}
 AST::~AST(){}

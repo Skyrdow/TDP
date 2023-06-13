@@ -19,9 +19,8 @@ private:
     bool isOperator(string token);
     bool isNumber(string token);
     bool isVariable(string token);
-    const char *filename;
 public:
-    Node *readfile();
-    loadFile(const char *filename);
+    Node *readfile(const char *filename);
+    loadFile();
     ~loadFile();
 };
