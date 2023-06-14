@@ -76,6 +76,8 @@ Node *AST::sum_tree(Node * node)
 		bool is_unico = true;
 		for (auto elem_unico : elems_unicos)
 		{
+			// cout << endl;
+			// elem->printAST(0);
 			if (elem->equal(elem_unico))
 				is_unico = false;
 		}
@@ -106,7 +108,7 @@ Node *AST::sum_tree(Node * node)
 		sum_tail = (Node_Operation *)sum_tail->right;
 	}
 	// Retornar el árbol final
-	return eval(sum_root);
+	return sum_root;
 }
 
 /// @brief Inserta todos los nodos que no sean el nodo '+'
@@ -118,9 +120,18 @@ void AST::get_sum_elements(Node *node, vector<Node *> &elems)
 		return elems.push_back(node);
 	
 	Node_Operation *op_node = (Node_Operation *)node;
+	if (op_node->operation == '-')
+	{
+		elems.push_back(op_node->left->clone());
+		delete op_node->left;
+		op_node->left = new Node_Number(0);
+		elems.push_back(op_node);
+		return;
+	}
+
 	if (op_node->operation != '+')
 		return elems.push_back(node);
-	// Si es un nodo ´+´, llamar recursivamente en sus hijos
+	// Si es un nodo '+', llamar recursivamente en sus hijos
 	get_sum_elements(op_node->left, elems);
 	get_sum_elements(op_node->right, elems);
 }
@@ -132,16 +143,12 @@ Node *AST::simplify_sum(Node *node)
 {
 	//! Esta función es bastante larga
 	Node_Operation *op_node = (Node_Operation *)node;
-	Node *left = op_node->left;
-	Node *right = op_node->right;
 
 	// a + 0 = a
-	if (left->isNodeNumber())
-		if (((Node_Number *)left)->value == 0)
-			return right;
-	if (right->isNodeNumber())
-		if (((Node_Number *)right)->value == 0)
-			return left;
+	if (op_node->left->equal(new Node_Number(0)))
+		return op_node->right;
+	if (op_node->right->equal(new Node_Number(0)))
+		return op_node->left;
 	
 	// a + a = 2a
 	if (op_node->right->equal(op_node->left))
@@ -152,52 +159,75 @@ Node *AST::simplify_sum(Node *node)
 		return op_node;
 	}
 
-	// a + n*a = n+1 * a
-	if (op_node->left->isNodeOperation())
+	// (0-b) + a = a-b
+	if (op_node->left->isNodeOperation() && get_operation(op_node->left) == '-')
 	{
+		// (0-b) -> a-b
 		Node_Operation *left_op = ((Node_Operation*)op_node->left);
-		if (get_operation(left_op) == '*')
+		if (left_op->left->isNodeNumber() && left_op->left->equal(new Node_Number(0)))
 		{
-			if (op_node->right->equal(left_op->right))
-			{
-				op_node->operation = '*';
-				left_op->operation = '+';
-				delete left_op->right;
-				left_op->right = new Node_Number(1);
-				op_node->left = eval(left_op);
-			}
-			if (op_node->right->equal(left_op->left))
-			{
-				op_node->operation = '*';
-				left_op->operation = '+';
-				delete left_op->left;
-				left_op->left = new Node_Number(1);
-				op_node->left = eval(left_op);
-			}
-			return node;
+			Node_Operation *new_node = new Node_Operation('-', op_node->right->clone(), left_op->right->clone());
+			delete op_node;
+			return eval(new_node);
 		}
 	}
-	if (op_node->right->isNodeOperation())
+	// a + (0-b) = a-b
+	if (op_node->right->isNodeOperation() && get_operation(op_node->right) == '-')
 	{
 		Node_Operation *right_op = ((Node_Operation*)op_node->right);
-		if (get_operation(right_op) == '*')
+		// (0-b) -> a-b
+		if (right_op->left->isNodeNumber() && right_op->left->equal(new Node_Number(0)))
 		{
-			if (op_node->left->equal(right_op->right))
-			{
-				op_node->operation = '*';
-				right_op->operation = '+';
-				delete right_op->right;
-				right_op->right = new Node_Number(1);
-				op_node->right = eval(right_op);
-			}
-			if (op_node->left->equal(right_op->left))
-			{
-				op_node->operation = '*';
-				right_op->operation = '+';
-				delete right_op->left;
-				right_op->left = new Node_Number(1);
-				op_node->right = eval(right_op);
-			}
+			Node_Operation *new_node = new Node_Operation('-', op_node->left->clone(), right_op->right->clone());
+			delete op_node;
+			return eval(new_node);
+		}
+	}
+
+	// a + n*a = n+1 * a
+	if (op_node->left->isNodeOperation() && get_operation(op_node->left) == '*')
+	{
+		Node_Operation *left_op = ((Node_Operation*)op_node->left);
+		// Econtrar el elemento común
+		if (op_node->right->equal(left_op->right))
+		{
+			op_node->operation = '*';
+			left_op->operation = '+';
+			delete left_op->right;
+			left_op->right = new Node_Number(1);
+			op_node->left = eval(left_op);
+			return op_node;
+		}
+		if (op_node->right->equal(left_op->left))
+		{
+			op_node->operation = '*';
+			left_op->operation = '+';
+			delete left_op->left;
+			left_op->left = new Node_Number(1);
+			op_node->left = eval(left_op);
+			return op_node;
+		}
+	}
+	if (op_node->right->isNodeOperation() && get_operation(op_node->right) == '*')
+	{
+		Node_Operation *right_op = ((Node_Operation*)op_node->right);
+		if (op_node->left->equal(right_op->right))
+		{
+			op_node->operation = '*';
+			right_op->operation = '+';
+			delete right_op->right;
+			right_op->right = new Node_Number(1);
+			op_node->right = eval(right_op);
+			return op_node;
+		}
+		if (op_node->left->equal(right_op->left))
+		{
+			op_node->operation = '*';
+			right_op->operation = '+';
+			delete right_op->left;
+			right_op->left = new Node_Number(1);
+			op_node->right = eval(right_op);
+			return op_node;
 		}
 	}
 	
@@ -208,6 +238,8 @@ Node *AST::simplify_sum(Node *node)
 		{
 			Node_Operation *left_op = ((Node_Operation*)op_node->left);
 			Node_Operation *right_op = ((Node_Operation*)op_node->right);
+			// Sumar n + m y multiplicar por a
+			// Encontrar n, m y a
 			if (right_op->right->equal(left_op->right))
 			{
 				Node *sum = eval(new Node_Operation('+', right_op->left->clone(), left_op->left->clone()));
@@ -237,6 +269,9 @@ Node *AST::simplify_sum(Node *node)
 /// @param node Nodo a simplificar
 Node *AST::simplify(Node *node)
 {
+	// cout << "--------\n";
+	// printAST(node);
+	// cout << "--------\n";
 	// No se puede hacer nada
 	if (!node->isNodeOperation())
 		return node;
@@ -251,40 +286,40 @@ Node *AST::simplify(Node *node)
 			if (left->equal(right))
 					return new Node_Number(0);
 			if (right->isNodeNumber())
-				if (((Node_Number *)right)->value == 0)
+				if (right->equal(new Node_Number(0)))
 					return left;
 			return node;
 		case '+':
 			return simplify_sum(node);
 		case '*':
-			// a * 0 = 0 || a * 1 = a
-			if (left->isNodeNumber())
-			{
-				if (((Node_Number *)left)->value == 0)
-					return new Node_Number(0);
-				if (((Node_Number *)left)->value == 1)
-					return right;
-			}
-			if (right->isNodeNumber())
-			{
-				if (((Node_Number *)right)->value == 0)
-					return new Node_Number(0);
-				if (((Node_Number *)right)->value == 1)
-					return left;
-			}
+			// a * 0 = 0
+			if (left->equal(new Node_Number(0)))
+				return new Node_Number(0);
+			if (left->equal(new Node_Number(1)))
+				return right;
+
+			// a * 1 = a
+			if (right->equal(new Node_Number(0)))
+				return new Node_Number(0);
+			if (right->equal(new Node_Number(1)))
+				return left;
 			
 			return node;
 		case '^':
 			// 0 ^ a = 0
-			if (left->type == NUMBER)
-				if (((Node_Number *)left)->value == 0)
-					return new Node_Number(0);
+			if (left->equal(new Node_Number(0)))
+			{
+				// caso 0 ^ 0 = indefinido
+				if (right->isNodeNumber() && right->equal(new Node_Number(0)))
+					exit(7);
+				return new Node_Number(0);
+			}
+
 			// a ^ 1 = a || a ^ 0 = 1
-			if (right->type == NUMBER)
-				if (((Node_Number *)right)->value == 0)
-					return new Node_Number(1);
-				if (((Node_Number *)right)->value == 1)
-					return left;
+			if (right->equal(new Node_Number(0)))
+				return new Node_Number(1);
+			if (right->equal(new Node_Number(1)))
+				return left;
 			return node;
 		default:
 			cout << "Error" << endl;

@@ -5,7 +5,7 @@
       "name": "(gdb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "/mnt/c/Users/lucas/Documents/Git/TDP/LAB2/testOp",
+      "program": "/mnt/c/Users/lucas/Documents/Git/TDP/LAB2/main",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",

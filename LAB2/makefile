@@ -1,21 +1,24 @@
 FLAGS = -g
 
-all: main testNodeNumber testNodeOperation testNodeVariable testloadFile
+all: auto_txts.o main.o testNodeNumber.o testNodeOperation.o testNodeVariable.o testloadFile.o
 
-testloadFile: testloadFile.cpp Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
-	g++ $(FLAGS) -o testloadFile testloadFile.cpp Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+testloadFile.o: testloadFile.cpp Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+	g++ $(FLAGS) -o testloadFile.o testloadFile.cpp Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
 
-testNodeNumber: testNodeNumber.cpp Node.o Node_Number.o
-	g++ $(FLAGS) -o testNodeNumber Node.o Node_Number.o testNodeNumber.cpp
+testNodeNumber.o: testNodeNumber.cpp Node.o Node_Number.o
+	g++ $(FLAGS) -o testNodeNumber.o Node.o Node_Number.o testNodeNumber.cpp
 
-testNodeOperation: testNodeOperation.cpp Node.o Node_Number.o
-	g++ $(FLAGS) -o testNodeOperation Node.o Node_Number.o Node_Operation.o testNodeOperation.cpp
+testNodeOperation.o: testNodeOperation.cpp Node.o Node_Number.o
+	g++ $(FLAGS) -o testNodeOperation.o Node.o Node_Number.o Node_Operation.o testNodeOperation.cpp
 
-testNodeVariable: testNodeVariable.cpp Node.o Node_Variable.o
-	g++ $(FLAGS) -o testNodeVariable Node.o Node_Variable.o testNodeVariable.cpp
+testNodeVariable.o: testNodeVariable.cpp Node.o Node_Variable.o
+	g++ $(FLAGS) -o testNodeVariable.o Node.o Node_Variable.o testNodeVariable.cpp
 
-main: main.cpp AST.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
-	g++ $(FLAGS) -o main Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o AST.o main.cpp
+main.o: main.cpp AST.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+	g++ $(FLAGS) -o main.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o AST.o main.cpp
+
+auto_txts.o: auto_txts.cpp AST.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+	g++ $(FLAGS) -o auto_txts.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o AST.o auto_txts.cpp
 
 AST.o: AST.cpp AST.h
 	g++ $(FLAGS) -c AST.cpp
