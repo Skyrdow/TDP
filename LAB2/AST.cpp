@@ -1,6 +1,12 @@
 #include "AST.h"
 
-// Solo cuando ambos operandos son numeros
+// mirar todos los isnodeX
+
+/// Función entregada por el profesor Pablo Román
+/// @brief Opera los valores de los nodos
+/// @param operation Char que representa la opearción a realizar
+/// @param l Valor izquierdo
+/// @param r Valor derecho
 int AST::operate(char operation, int l, int r)
 {
 	switch(operation) {
@@ -18,128 +24,104 @@ int AST::operate(char operation, int l, int r)
 			cout << "Error" << endl;
 			exit(1);
 	}
-
 }
 
-bool AST::isNodeOperation(Node *node) {
-	return node->type == OPERATOR;
-}
-
-bool AST::isNodeNumber(Node *node) {
-	return node->type == NUMBER;
-}
-
-bool AST::isNodeVariable(Node *node) {
-	return node->type == VARIABLE;
-}
-
-char AST::get_operation(Node *node) {
-	Node_Operation *node_op = (Node_Operation *)node;
-	return node_op->operation;
-}
-int AST::get_value(Node *node) {
-	Node_Number *node_num = (Node_Number *)node;
-	return node_num->value;
-}
-char AST::get_name(Node *node) {
-	Node_Variable *node_var = (Node_Variable *)node;
-	return node_var->name;
-}
-
+/// @brief Revisa si dos nodos son equivalentes
+/// @param node_1 Nodo 1 a comparar
+/// @param node_2 Nodo 2 a comparar
 bool AST::equal(Node *node_1, Node *node_2)
 {
+	// Si ambos nodos no son del mismo tipo, no son iguales
 	if (node_1->type != node_2->type)
 		return false;
+	
+	// Se asume que ambos son del mismo tipo en adelante
+	// Si ambos son operación
 	if (isNodeOperation(node_1))
 	{
 		Node_Operation *op_node_1 = (Node_Operation *)node_1;
 		Node_Operation *op_node_2 = (Node_Operation *)node_2;
+		// Revisar si es la misma operación
 		if (get_operation(node_1) != get_operation(node_2))
 			return false;
-
+		// Revisar si los nodos hijos son iguales
 		if (equal(op_node_1->left, op_node_2->left) 
 			&& equal(op_node_1->right, op_node_2->right))
 			return true;
-		// operaciones conmutativas
+		// Intercambiar hijos para operaciones conmutativas
 		if (get_operation(node_1) == '*' || get_operation(node_1) == '+' )
 			return equal(op_node_1->left, op_node_2->right) 
 					&& equal(op_node_1->right, op_node_2->left);
+		// No es la misma operación
 		return false;
 	}
+	// Casos simples de números y variables
 	if (isNodeNumber(node_1))
 		return get_value(node_1) == get_value(node_2);
 	if (isNodeVariable(node_1))
 		return (get_name(node_1) == get_name(node_2));
+	// error
 	exit(3);
 }
 
-char AST::get_var(Node *node)
-{
-	if (isNodeVariable(node))
-		return get_name(node);
-	if (isNodeNumber(node))
-		return '\0';
-	if (isNodeOperation(node))
-	{
-		Node_Operation *op_node = (Node_Operation *)node;
-		char var_left = get_var(op_node->left);
-		char var_right = get_var(op_node->right);
-		if (var_left != '\0')
-			return var_left;
-		if (var_right != '\0')
-			return var_right;
-		return '\0';
-	}
-	exit(5);
-}
-
+/// @brief Ordena un árbol de sumas por elementos no expandibles
+/// @param node Nodo raíz del árbol de sumas
 Node *AST::sum_tree(Node * node)
 {
+	// Evitar errores revisando si el nodo raíz es una suma
 	if (!isNodeOperation(node))
 		return node;
 
 	Node_Operation *op = (Node_Operation *)node;
 	// revisar si es suma
-	if (get_operation(op) == '+')
+	if (get_operation(op) != '+')
+		return node;
+
+	vector<Node *> elems; // Vector de todos los elementos
+	vector<Node *> elems_unicos; // Vector de elementos unicos
+	get_sum_elements(op, elems); // Obtener todos los elementos
+	// Obtener los elementos únicos del árbol de sumas
+	for (auto elem : elems)
 	{
-		vector<Node *> elems;
-		vector<Node *> elems_unicos; // elementos unicos
-		get_sum_elements(op, elems);
-		for (auto elem : elems)
+		bool is_unico = true;
+		for (auto elem_unico : elems_unicos)
 		{
-			bool is_unico = true;
-			for (auto elem_unico : elems_unicos)
-			{
-				if (equal(elem, elem_unico))
-					is_unico = false;
-			}
-			if (is_unico)
-				elems_unicos.push_back(elem);
+			if (equal(elem, elem_unico))
+				is_unico = false;
 		}
-		Node_Operation *sum_root = new Node_Operation('+', new Node_Number(0), new Node_Number(0));
-		Node_Operation *sum_tail = sum_root;
-		for (auto var_unica : elems_unicos) 
-		{
-			Node_Operation *sub_sum_root = new Node_Operation('+', new Node_Number(0), new Node_Number(0));
-			Node_Operation *sub_sum_tail = sub_sum_root;
-			for (int i = 0; i < elems.size(); i++)
-			{
-				if (equal(elems[i], var_unica))
-				{
-					delete sub_sum_tail->right;
-					sub_sum_tail->right = new Node_Operation('+', elems[i], new Node_Number(0));
-					sub_sum_tail = (Node_Operation *)sub_sum_tail->right;
-				}
-			}
-			delete sum_tail->right;
-			sum_tail->right = new Node_Operation('+', sub_sum_root, new Node_Number(0));
-			sum_tail = (Node_Operation *)sum_tail->right;
-		}
-		return eval(sum_root);
+		if (is_unico)
+			elems_unicos.push_back(elem);
 	}
-	return node;
+	// Se comienza con un árbol + 0 0, luego se reemplazará uno de los 0s con un sub-árbol
+	Node_Operation *sum_root = new Node_Operation('+', new Node_Number(0), new Node_Number(0));
+	Node_Operation *sum_tail = sum_root;
+	for (auto var_unica : elems_unicos) 
+	{
+		// Crear sub-árboles de elementos iguales
+		Node_Operation *sub_sum_root = new Node_Operation('+', new Node_Number(0), new Node_Number(0));
+		Node_Operation *sub_sum_tail = sub_sum_root;
+		for (int i = 0; i < elems.size(); i++)
+		{
+			// Agregar todos los elementos iguales a su sub-árbol
+			if (equal(elems[i], var_unica))
+			{
+				delete sub_sum_tail->right;
+				sub_sum_tail->right = new Node_Operation('+', elems[i], new Node_Number(0));
+				sub_sum_tail = (Node_Operation *)sub_sum_tail->right;
+			}
+		}
+		// Agregar el sub-árbol al árbol final
+		delete sum_tail->right;
+		sum_tail->right = new Node_Operation('+', sub_sum_root, new Node_Number(0));
+		sum_tail = (Node_Operation *)sum_tail->right;
+	}
+	// Retornar el árbol final
+	return eval(sum_root);
 }
 
+/// @brief Inserta todos los nodos que no sean el nodo '+'
+/// @param node Raíz recursiva para recorrer todo el árbol
+/// @param elems Referencia al vector de elementos
 void AST::get_sum_elements(Node *node, vector<Node *> &elems)
 {
 	if (!isNodeOperation(node))
@@ -148,21 +130,21 @@ void AST::get_sum_elements(Node *node, vector<Node *> &elems)
 	Node_Operation *op_node = (Node_Operation *)node;
 	if (op_node->operation != '+')
 		return elems.push_back(node);
+	// Si es un nodo ´+´, llamar recursivamente en sus hijos
 	get_sum_elements(op_node->left, elems);
 	get_sum_elements(op_node->right, elems);
 }
 
+/// @brief Aplicar simplificaciones, de caso en caso
 Node *AST::simplify(Node *node)
 {
 	// No se puede hacer nada
 	if (!isNodeOperation(node))
 		return node;
-	// cout << "----------" << endl;
-	// printAST(node);
-	// cout << "----------" << endl;
 	Node_Operation *op_node = (Node_Operation *)node;
 	Node *left = op_node->left;
 	Node *right = op_node->right;
+	// Casos implementados de simplificación
 	switch(op_node->operation)
 	{
 		case '-':
@@ -307,30 +289,45 @@ Node *AST::simplify(Node *node)
 	}
 }
 
+/// @brief Realizar operación entre nodos de tipo número
+/// @param op Nodo operación, del cual ya se sabe que sus hijos son números
+/// Código entregado por Pablo Román
 Node *AST::operateNode(Node_Operation *op)
 {
 	Node_Number *l_number = ((Node_Number*)op->left);
 	Node_Number *r_number = ((Node_Number*)op->right);
 	int operation_result = operate(op->operation, l_number->value, r_number->value);
 	Node_Number* num = new Node_Number(operation_result);
-	// actualizando el link al padre
-	delete op;  //----> OJO con esto
-
-	// cout << "VALOR OPERACION: " << num->value << endl;
+	delete op;
 	return num;
 }
 
+/// @brief Reemplaza un nodo que ya se sabe que es una variable por un número
+/// @param node Nodo variable que va a ser reemplazado
+/// @param var_names Vector que contiene los nombres de las variables a reemplazar
+/// @param var_values Vector que contiene los valores de las variables a reemplazar
+/// Ambos vectores deben tener el mismo tamaño, 
+/// y los valores y variables a reemplazar deben estar en la misma posición.
 Node *AST::replace_var(Node *node, vector<char> var_names, vector<int> var_values)
 {
 	char var_name = ((Node_Variable *)node)->name;
 	for (int i = 0; i < var_names.size(); i++)
 	{
 		if (var_name == var_names[i])
+		{
+			delete node;
 			return new Node_Number(var_values[i]);
+		}
 	}
 	return node;
 }
 
+/// @brief Recorre el árbol buscando nodos variables para reemplazar con valores
+/// @param node Raíz recursiva
+/// @param var_names Vector que contiene los nombres de las variables a reemplazar
+/// @param var_values Vector que contiene los valores de las variables a reemplazar
+/// Ambos vectores deben tener el mismo tamaño, 
+/// y los valores y variables a reemplazar deben estar en la misma posición.
 Node* AST::recursive_replace(Node* node, vector<char> var_names, vector<int> var_values)
 {
 	if (node->type == VARIABLE)
@@ -512,8 +509,8 @@ void AST::printAST(Node* p, int indent)
 
 Node* AST::evaluate(Node* node)
 {
-	node = eval(node);
 	// node = expand(node); función no implementada
+	node = eval(node);
 	node = sum_tree(node);
 	return node;
 }

@@ -1,6 +1,8 @@
 #include "AST.h"
 
+/// @brief Programa principal que controla el menú
 int main() {
+	// Definiciones
 	string nombreArchivo;
 	int opcion;
 	loadFile *lf = new loadFile();
@@ -13,6 +15,8 @@ int main() {
 	char caracter;
 	int numero;
 	int cantidad;
+
+	// Ciclo do while para el menú
     do {
         // Mostrar el menú
         cout << endl << "-----------------------------" << endl;
@@ -29,7 +33,7 @@ int main() {
         // Leer la opción seleccionada
         cout << "Seleccione una opción: ";
         cin >> opcion;
-		cin.ignore();
+		cin.ignore(); // Agregado para solucionar bug de entrada por consola
         // Realizar acciones según la opción seleccionada
         switch (opcion) {
             case 1:
@@ -92,6 +96,7 @@ int main() {
 				}
                 cout << "Saliendo del programa...\n";
 				break;
+			//! Opciones agregadas por falta de tiempo (informe)
 			case 6:
                 cout << "Evaluando: \n";
 				root = ast->sum_tree(root);
