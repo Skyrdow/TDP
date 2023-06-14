@@ -1,8 +1,11 @@
 #include "AST.h"
 
+//! para imprimir linealmente reemplaza printAST por print_linear
+
 /// @brief Programa principal que controla el menú
 int main() {
 	// Definiciones
+	string nombreCarpeta = "txts/";
 	string nombreArchivo;
 	int opcion;
 	loadFile *lf = new loadFile();
@@ -21,7 +24,7 @@ int main() {
         // Mostrar el menú
         cout << endl << "-----------------------------" << endl;
         cout << "Menú:\n";
-        cout << "1. Cargar archivo\n";
+        cout << "1. Cargar archivo desde la carpeta txts\n";
         cout << "2. Evaluar\n";
         cout << "3. Evaluar con reemplazo de variables\n";
         cout << "4. Derivar\n";
@@ -39,6 +42,7 @@ int main() {
             case 1:
 				cout << "Ingrese el nombre del archivo: ";
 				if (getline(cin, nombreArchivo));
+				nombreArchivo = nombreCarpeta + nombreArchivo;
 				root = lf->readfile(nombreArchivo.c_str());
 				cout << "Archivo cargado: \n";
 				ast->printAST(root);

@@ -14,22 +14,25 @@ class AST
 {
 private:
     int operate(char operation, int l, int r);
-    bool equal(Node *node_1, Node *node_2);
-    Node *simplify_var_pow(Node *node);
+    // Operaciones de casteo rápido, no implementables en los objetos nodo
+    char get_operation(Node *node);
+    int get_value(Node *node);
+    char get_name(Node *node);
+    
     void get_sum_elements(Node *node, vector<Node *> &elems);
+    Node *simplify_sum(Node *node);
     Node *simplify(Node *node);
     Node *operateNode(Node_Operation *op);
     Node *replace_var(Node *node, vector<char> var_names, vector<int> var_values);
     Node* recursive_replace(Node* node, vector<char> var_names, vector<int> var_values);
-    Node *clone(Node *old);
     Node *derive_sumsub(Node_Operation *op_node, char derive_var);
     Node *derive_mult(Node_Operation *op_node, char derive_var);
     Node *derive_pow(Node_Operation *op_node, char derive_var);
-    Node *derive_operation(Node_Operation *op_node, char derive_var);
+    Node *derive_operation(Node *node, char derive_var);
 public:
     Node *derive(Node *node, char derive_var);
-    void print(Node *node);
-    void printAST(Node* p, int indent=0);
+    void print_linear(Node *node);
+    void printAST(Node* p);
     Node* evaluate(Node* node);
     Node* evaluate(Node* node, vector<char> var_names, vector<int> var_values);
     Node* eval(Node* node);

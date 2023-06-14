@@ -1,8 +1,20 @@
 FLAGS = -g
 
-all: parser
+all: main testNodeNumber testNodeOperation testNodeVariable testloadFile
 
-parser: main.cpp AST.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+testloadFile: testloadFile.cpp Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+	g++ $(FLAGS) -o testloadFile testloadFile.cpp Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
+
+testNodeNumber: testNodeNumber.cpp Node.o Node_Number.o
+	g++ $(FLAGS) -o testNodeNumber Node.o Node_Number.o testNodeNumber.cpp
+
+testNodeOperation: testNodeOperation.cpp Node.o Node_Number.o
+	g++ $(FLAGS) -o testNodeOperation Node.o Node_Number.o Node_Operation.o testNodeOperation.cpp
+
+testNodeVariable: testNodeVariable.cpp Node.o Node_Variable.o
+	g++ $(FLAGS) -o testNodeVariable Node.o Node_Variable.o testNodeVariable.cpp
+
+main: main.cpp AST.o Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o
 	g++ $(FLAGS) -o main Node.o Node_Operation.o Node_Variable.o Node_Number.o loadFile.o AST.o main.cpp
 
 AST.o: AST.cpp AST.h

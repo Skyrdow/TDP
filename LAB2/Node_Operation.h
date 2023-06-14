@@ -12,5 +12,7 @@ public:
     Node *right;
     char operation;
     void print();
-    void postprint(Node *p);
+    void printAST(int indent);
+    Node *clone();
+    bool equal(Node *node);
 };

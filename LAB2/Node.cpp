@@ -11,30 +11,40 @@ Node::~Node() {
 /// @brief Función virtual, versión base usada para encontrar errores
 void Node::print() {
     std::cout << "Invalid Node" << std::endl;
+	exit(5);
 }
 
+/// @brief Función virtual, versión base usada para encontrar errores
+void Node::printAST(int indent) {
+    std::cout << "Invalid Node" << std::endl;
+	exit(5);
+}
 
+/// @brief Función virtual, versión base usada para encontrar errores
+Node *Node::clone() {
+    std::cout << "Invalid Node" << std::endl;
+	exit(5);
+}
+
+/// @brief Función de pertenencia para el tipo de nodo
 bool Node::isNodeOperation() {
-	return node->type == OPERATOR;
+	return type == OPERATOR;
 }
 
+/// @brief Función de pertenencia para el tipo de nodo
 bool Node::isNodeNumber() {
-	return node->type == NUMBER;
+	return type == NUMBER;
 }
 
+/// @brief Función de pertenencia para el tipo de nodo
 bool Node::isNodeVariable() {
-	return node->type == VARIABLE;
+	return type == VARIABLE;
 }
 
-char Node::get_operation() {
-	Node_Operation *node_op = (Node_Operation *)node;
-	return node_op->operation;
-}
-int Node::get_value() {
-	Node_Number *node_num = (Node_Number *)node;
-	return node_num->value;
-}
-char Node::get_name() {
-	Node_Variable *node_var = (Node_Variable *)node;
-	return node_var->name;
+/// @brief Revisa si dos nodos son equivalentes, función virtual base usada para detectar errores
+/// @param node_1 Nodo 1 a comparar
+/// @param node_2 Nodo 2 a comparar
+bool equal(Node *node)
+{
+	exit(6);
 }

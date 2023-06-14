@@ -3,6 +3,7 @@
 
 #pragma once
 #include <iostream>
+#include <iomanip>
 
 // Clase básica para crear el resto de nodos desde esta defición
 class Node {
@@ -16,14 +17,13 @@ public:
     Node();
     ~Node();
     int type;
-    int getType();
-    char get_operation();
-    int get_value();
-    char get_name();
     bool isNodeOperation();
     bool isNodeNumber();
     bool isNodeVariable();
     virtual void print() = 0;
+    virtual void printAST(int indent) = 0;
+    virtual Node *clone() = 0;
+    virtual bool equal(Node *node) = 0;
 };
 
 #endif
