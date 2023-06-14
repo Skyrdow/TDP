@@ -1,7 +1,5 @@
 #include "AST.h"
 
-// mirar todos los isnodeX
-
 /// Función entregada por el profesor Pablo Román
 /// @brief Opera los valores de los nodos
 /// @param operation Char que representa la opearción a realizar
@@ -120,6 +118,7 @@ void AST::get_sum_elements(Node *node, vector<Node *> &elems)
 		return elems.push_back(node);
 	
 	Node_Operation *op_node = (Node_Operation *)node;
+	// a - b -> a + (0 - b)
 	if (op_node->operation == '-')
 	{
 		elems.push_back(op_node->left->clone());
